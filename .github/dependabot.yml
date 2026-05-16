@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+    cooldown:
+      default-days: 7      # The baseline safety net
+      semver-major-days: 30 # Wait for the community to find breaking changes
+      semver-minor-days: 14 # Balance between new features and stability
+      semver-patch-days: 3  # Short wait to ensure a patch isn't immediately yanked
