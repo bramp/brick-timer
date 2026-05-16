@@ -1,0 +1,11 @@
+name: brick_time_workspace
+publish_to: none
+
+environment:
+  sdk: ^3.11.0
+
+workspace:
+  - apps/brick_time
+
+dev_dependencies:
+  very_good_analysis: ^6.0.0

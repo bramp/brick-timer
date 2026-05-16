@@ -1,0 +1,32 @@
+# Flutter Test Workflow Template
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Check formatting
+        run: make format && git diff --exit-code
+
+      - name: Static analysis
+        run: make analyze
+
+      - name: Run tests
+        run: make test-ci

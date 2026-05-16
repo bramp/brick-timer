@@ -1,0 +1,6 @@
+# This file configures the analyzer, which statically analyzes Dart code to
+# check for errors, warnings, and lints.
+include: package:very_good_analysis/analysis_options.yaml
+
+# Keep default analyzer/linter rules enabled whenever possible.
+# Only disable a rule when there is a clear, documented justification.
