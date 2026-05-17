@@ -1,12 +1,25 @@
 import 'package:brick_time/main.dart';
+import 'package:brick_time/state/dashboard_providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('App smoke test', (WidgetTester tester) async {
+  testWidgets('App smoke test', (tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          buildSessionsProvider.overrideWith((ref) => Stream.value([])),
+          unsyncedBagsCountProvider.overrideWith((ref) => Stream.value(0)),
+        ],
+        child: const BrickTimeApp(),
+      ),
+    );
 
-    // Verify that our app shows the title.
-    expect(find.text('BrickTime'), findsOneWidget);
+    // Give it a moment to resolve the provider.
+    await tester.pumpAndSettle();
+
+    // Verify that our app shows the dashboard title instead of basic text.
+    expect(find.text('BrickTime Dashboard'), findsOneWidget);
   });
 }

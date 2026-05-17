@@ -20,7 +20,7 @@ The purpose of BrickTime is to track the exact time it takes to build a LEGO set
 
 * **Frontend Framework:** Flutter (Cross-platform)
 * **State Management:** Riverpod (Reactive, async-driven architecture)
-* **Local Database:** Isar Database (High-performance, NoSQL-like local storage with native relation support)
+* **Local Database:** Drift Database (High-performance SQLite local storage for Flutter)
 * **External Integration:** Rebrickable API v3 (REST)
 * **Spreadsheet Target:** Google Sheets via a lightweight Google Apps Script Webhook (HTTP POST payload)
 
@@ -28,7 +28,7 @@ The purpose of BrickTime is to track the exact time it takes to build a LEGO set
 
 ## 3. System Architecture & Data Strategy
 
-### Local Storage Architecture (Isar-focused)
+### Local Storage Architecture (Drift-focused)
 
 To avoid intricate real-time calculations or complex duration arrays, the app relies on an **Interval Ledger System**.
 
@@ -104,7 +104,7 @@ The backend sheet relies on a micro-service script to process incoming payloads 
 
 ### Phase 1: Local Ledger Foundation
 
-* Initialize the Isar database engine.
+* Initialize the Drift SQLite database engine.
 * Scaffold the high-level models for Sets, Sessions, Intervals, and Completed Bags.
 * Write local repository operations to fetch active durations and query un-synced dependencies.
 

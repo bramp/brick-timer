@@ -2,8 +2,8 @@
 
 .PHONY: all run format analyze test test-ci fix upgrade clean
 
-# Device to run on: chrome, macos, ios, android (default: chrome)
-DEVICE ?= chrome
+# Device to run on: chrome, macos, ios, android (default: macos)
+DEVICE ?= macos
 # Port for Flutter web dev server
 WEB_PORT ?= 3000
 
@@ -30,6 +30,9 @@ test-ci:
 
 fix:
 	dart fix --apply
+
+build_runner:
+	$(APP) && dart run build_runner build --delete-conflicting-outputs
 
 upgrade:
 	dart pub upgrade --major-versions --tighten
