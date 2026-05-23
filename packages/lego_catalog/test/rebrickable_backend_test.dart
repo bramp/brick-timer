@@ -51,8 +51,7 @@ void main() {
         );
       });
 
-      final dio = Dio();
-      dio.httpClientAdapter = adapter;
+      final dio = Dio()..httpClientAdapter = adapter;
       final backend = RebrickableBackend(apiKey: 'TEST_KEY', dio: dio);
 
       final results = await backend.searchSets('Lamborghini');
@@ -97,8 +96,7 @@ void main() {
         );
       });
 
-      final dio = Dio();
-      dio.httpClientAdapter = adapter;
+      final dio = Dio()..httpClientAdapter = adapter;
       final backend = RebrickableBackend(
         apiKey: 'TEST_KEY',
         dio: dio,
@@ -117,8 +115,7 @@ void main() {
         return ResponseBody.fromString('Unauthorized', 401);
       });
 
-      final dio = Dio();
-      dio.httpClientAdapter = adapter;
+      final dio = Dio()..httpClientAdapter = adapter;
       final backend = RebrickableBackend(apiKey: 'TEST_KEY', dio: dio);
 
       await expectLater(

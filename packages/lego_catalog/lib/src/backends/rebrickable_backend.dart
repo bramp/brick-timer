@@ -1,11 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:dio_smart_retry/dio_smart_retry.dart';
 
-import '../errors/catalog_http_exception.dart';
-import '../models/lego_set.dart';
-import 'lego_catalog_backend.dart';
+import 'package:lego_catalog/src/backends/lego_catalog_backend.dart';
+import 'package:lego_catalog/src/errors/catalog_http_exception.dart';
+import 'package:lego_catalog/src/models/lego_set.dart';
 
+/// Rebrickable-backed implementation of [LegoCatalogBackend].
 class RebrickableBackend implements LegoCatalogBackend {
+  /// Creates a backend with configurable retry, timeout, and base URL options.
   RebrickableBackend({
     required String apiKey,
     Dio? dio,
@@ -31,8 +33,6 @@ class RebrickableBackend implements LegoCatalogBackend {
         'Authorization': 'key $_apiKey',
         'Accept': 'application/json',
       },
-      responseType: ResponseType.json,
-      validateStatus: (statusCode) => statusCode != null && statusCode < 400,
     );
 
     _dio.interceptors.add(
@@ -123,6 +123,7 @@ class RebrickableBackend implements LegoCatalogBackend {
     return LegoSetDetails.fromJson(data);
   }
 
+  /// Disposes owned HTTP resources when this backend created the Dio client.
   void dispose() {
     if (_ownsDio) {
       _dio.close(force: true);

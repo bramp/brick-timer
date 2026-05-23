@@ -62,8 +62,9 @@ Future<void> main(List<String> arguments) async {
   try {
     parsed = parser.parse(arguments);
   } on FormatException catch (error) {
-    stderr.writeln(error.message);
-    stderr.writeln(_usage(parser));
+    stderr
+      ..writeln(error.message)
+      ..writeln(_usage(parser));
     exitCode = 64;
     return;
   }
