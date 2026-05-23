@@ -1,14 +1,15 @@
 # Flutter Template Makefile
 
-.PHONY: all run format analyze test test-ci fix upgrade clean
+.PHONY: all run format analyze lint test test-ci fix upgrade clean
 
-# Device to run on: chrome, macos, ios, android (default: macos)
-DEVICE ?= macos
+# Device to run on: chrome, macos, ios, android (default: chrome)
+DEVICE ?= chrome
 # Port for Flutter web dev server
 WEB_PORT ?= 3000
 
 # Shorthand for running commands in the app directory
-APP = cd apps/brick_time
+APP = cd apps/brick_timer
+CATALOG = cd packages/lego_catalog
 
 all: format analyze test
 
@@ -20,13 +21,18 @@ format:
 	dart format .
 
 analyze:
-	flutter analyze apps/
+	dart analyze .
+	$(APP) && flutter analyze
+
+lint: analyze
 
 test:
 	$(APP) && flutter test
+	$(CATALOG) && dart test
 
 test-ci:
 	$(APP) && flutter test --reporter=compact
+	$(CATALOG) && dart test --reporter=compact
 
 fix:
 	dart fix --apply
