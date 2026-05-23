@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:lego_catalog/lego_catalog.dart';
 
 /// App adapter that maps generic catalog models to drift companions.
+// TODO We can remove this now, since this abstraction moved into packages/lego_catalog. We should have a similar service, that wraps the lego_catalog, but also provides caching, etc.
 class RebrickableService implements LegoCatalogService {
   /// Creates a catalog adapter using the provided backend or Rebrickable.
   RebrickableService({

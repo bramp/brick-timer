@@ -1,4 +1,4 @@
-# BrickTime Implementation Plan (TODO)
+# Brick Timer Implementation Plan (TODO)
 
 ## Phase 1: Local Ledger Foundation 🏃 (Current)
 - [x] Add `drift`, `sqlite3_flutter_libs`, and `path_provider` dependencies.
@@ -20,7 +20,11 @@
 
 ## Phase 3: Networking & Integrations
 - [x] Add `http` dependency.
-- [x] Implement `RebrickableService` to query Rebrickable's API v3 endpoint for set data.
+- [x] Implement abstract `LegoCatalogService` interface to future-proof API calls.
+- [x] Implement `RebrickableService` to query Rebrickable's API v3 endpoint for set data (currently using test key).
+- [ ] Add alternative `packages/lego_catalog` backend to use a Firebase Serverless Proxy to secure the API key via App Check/Auth.
+- [ ] Add `firebase_crashlytics` for production crash/error reporting.
+- [ ] Add `firebase_analytics` for usage/event telemetry.
 - [x] Implement `SpreadsheetService` to POST completed bag payloads (JSON: date, setNumber, setName, bagNumber, totalDurationMinutes) to the Google Apps Script Webhook.
 - [x] Wire the automated background sync trigger when a bag status moves to complete.
 
@@ -30,3 +34,5 @@
 - [ ] Construct Active Build Workspace (Prominent image, giant running stopwatch, Start/Pause/Resume/Complete buttons).
 - [ ] Add manual adjustments ("Oops, forgot to start" offset controls).
 - [ ] Add simple line/bar visual charts for tracking bricks-per-minute trends.
+- [ ] Wire the GitHub Pages build metadata (`COMMIT_HASH` and `BUILD_DATE`) into the app UI, using a small `BuildInfo` helper backed by `String.fromEnvironment`, similar to https://github.com/bramp/grids `apps/grids/lib/build_info.dart`.
+- [ ] Pull down to refresh
