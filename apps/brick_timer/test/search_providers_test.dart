@@ -1,0 +1,82 @@
+import 'package:brick_timer/repositories/ledger_repository.dart';
+import 'package:brick_timer/services/rebrickable_service.dart';
+import 'package:brick_timer/state/search_providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+/// A simple mock to track how many times the API was actually hit.
+class MockRebrickableService extends RebrickableService {
+  MockRebrickableService() : super(apiKey: 'TEST');
+
+  int searchSetsCallCount = 0;
+  List<String> queriedStrings = [];
+
+  @override
+  Future<List<LegoSetsCompanion>> searchSets(String query) async {
+    searchSetsCallCount++;
+    queriedStrings.add(query);
+    return [];
+  }
+}
+
+void main() {
+  test(
+    'searchResultsProvider debounces queries and cancels old requests',
+    () async {
+      final mockService = MockRebrickableService();
+      final container = ProviderContainer(
+        overrides: [
+          legoCatalogServiceProvider.overrideWithValue(mockService),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      // Listen to the provider so it stays alive and evaluates
+      container.listen(searchResultsProvider, (previous, next) {});
+
+      // 1. User types 'L'
+      container.read(searchQueryProvider.notifier).updateQuery('L');
+
+      // Wait 200ms (less than the 500ms debounce)
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+
+      // 2. User types 'Le' before the first one finishes
+      container.read(searchQueryProvider.notifier).updateQuery('Le');
+
+      // Wait 200ms
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+
+      // 3. User types 'Lego'
+      container.read(searchQueryProvider.notifier).updateQuery('Lego');
+
+      // Now we wait long enough for the 500ms debounce to finally complete
+      await Future<void>.delayed(const Duration(milliseconds: 600));
+
+      // Verify: The API should have only been hit exactly once, with the final
+      // string.
+      expect(mockService.searchSetsCallCount, 1);
+      expect(mockService.queriedStrings, ['Lego']);
+    },
+  );
+
+  test('searchResultsProvider ignores repeated normalized queries', () async {
+    final mockService = MockRebrickableService();
+    final container = ProviderContainer(
+      overrides: [
+        legoCatalogServiceProvider.overrideWithValue(mockService),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    container.listen(searchResultsProvider, (previous, next) {});
+
+    container.read(searchQueryProvider.notifier).updateQuery('Technic');
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+
+    container.read(searchQueryProvider.notifier).updateQuery('Technic');
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+
+    expect(mockService.searchSetsCallCount, 1);
+    expect(mockService.queriedStrings, ['Technic']);
+  });
+}
