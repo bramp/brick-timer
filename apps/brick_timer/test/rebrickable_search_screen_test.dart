@@ -9,10 +9,12 @@ import 'package:flutter_test/flutter_test.dart';
 class FakeCatalogService implements CatalogService {
   FakeCatalogService({
     this.shouldThrow = false,
+    this.throwsBeforeSuccess = 0,
     List<LegoSetsCompanion>? results,
   }) : _results = results ?? [];
 
   final bool shouldThrow;
+  int throwsBeforeSuccess;
   final List<LegoSetsCompanion> _results;
   final List<String> queries = [];
 
@@ -23,6 +25,10 @@ class FakeCatalogService implements CatalogService {
   Future<List<LegoSetsCompanion>> searchSets(String query) async {
     queries.add(query);
     if (shouldThrow) {
+      throw StateError('API failure');
+    }
+    if (throwsBeforeSuccess > 0) {
+      throwsBeforeSuccess--;
       throw StateError('API failure');
     }
     return _results;
@@ -43,7 +49,7 @@ void main() {
     await tester.pumpWidget(_buildTestApp(FakeCatalogService()));
     await tester.pumpAndSettle();
 
-    expect(find.text('Type a set number or name to search.'), findsOneWidget);
+    expect(find.text('Find your next build'), findsOneWidget);
   });
 
   testWidgets('shows search results after debounce', (tester) async {
@@ -79,7 +85,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
     await tester.pump();
 
-    expect(find.text('No sets found.'), findsOneWidget);
+    expect(find.text('No sets found'), findsOneWidget);
   });
 
   testWidgets('shows error state when service throws', (tester) async {
@@ -92,7 +98,114 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
     await tester.pump();
 
-    expect(find.textContaining('Error:'), findsOneWidget);
+    expect(find.text('Could not load search results'), findsOneWidget);
+    expect(
+      find.text('We could not load search results. Please try again.'),
+      findsOneWidget,
+    );
+    expect(find.text('Advanced'), findsOneWidget);
+    expect(find.textContaining('API failure'), findsNothing);
+
+    await tester.tap(find.text('Advanced'));
+    await tester.pumpAndSettle();
+    expect(find.text('Technical details'), findsOneWidget);
     expect(find.textContaining('API failure'), findsOneWidget);
+
+    await tester.tap(find.text('Hide details'));
+    await tester.pumpAndSettle();
+    expect(find.text('Technical details'), findsNothing);
+  });
+
+  testWidgets('pull-to-refresh retries search after an error', (tester) async {
+    final service = FakeCatalogService(
+      throwsBeforeSuccess: 1,
+      results: [
+        LegoSetsCompanion.insert(
+          setNumber: '42000-1',
+          name: 'Technic Race Car',
+          totalPieces: 250,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(_buildTestApp(service));
+
+    await tester.enterText(find.byType(TextField), 'technic');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump();
+
+    expect(find.text('Could not load search results'), findsOneWidget);
+    expect(service.queries, ['technic']);
+
+    await tester.drag(find.byType(ListView).first, const Offset(0, 300));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Technic Race Car'), findsOneWidget);
+    expect(service.queries, ['technic', 'technic']);
+  });
+
+  testWidgets('retry button retries search after an error', (tester) async {
+    final service = FakeCatalogService(
+      throwsBeforeSuccess: 1,
+      results: [
+        LegoSetsCompanion.insert(
+          setNumber: '42000-1',
+          name: 'Technic Race Car',
+          totalPieces: 250,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(_buildTestApp(service));
+
+    await tester.enterText(find.byType(TextField), 'technic');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump();
+
+    expect(find.text('Could not load search results'), findsOneWidget);
+    expect(service.queries, ['technic']);
+
+    await tester.tap(find.text('Try again'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Technic Race Car'), findsOneWidget);
+    expect(service.queries, ['technic', 'technic']);
+  });
+
+  testWidgets('app bar refresh retries search after an error', (tester) async {
+    final service = FakeCatalogService(
+      throwsBeforeSuccess: 1,
+      results: [
+        LegoSetsCompanion.insert(
+          setNumber: '42000-1',
+          name: 'Technic Race Car',
+          totalPieces: 250,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(_buildTestApp(service));
+
+    await tester.enterText(find.byType(TextField), 'technic');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump();
+
+    expect(find.text('Could not load search results'), findsOneWidget);
+    expect(service.queries, ['technic']);
+
+    await tester.tap(find.byTooltip('Refresh search results'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Technic Race Car'), findsOneWidget);
+    expect(service.queries, ['technic', 'technic']);
   });
 }

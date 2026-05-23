@@ -82,4 +82,25 @@ void main() {
     expect(mockService.searchSetsCallCount, 1);
     expect(mockService.queriedStrings, ['Technic']);
   });
+
+  test('searchResultsProvider refetches when invalidated', () async {
+    final mockService = MockCatalogService();
+    final container = ProviderContainer(
+      overrides: [
+        legoCatalogServiceProvider.overrideWithValue(mockService),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    container.listen(searchResultsProvider, (previous, next) {});
+
+    container.read(searchQueryProvider.notifier).updateQuery('Technic');
+    await container.read(searchResultsProvider.future);
+
+    container.invalidate(searchResultsProvider);
+    await container.read(searchResultsProvider.future);
+
+    expect(mockService.searchSetsCallCount, 2);
+    expect(mockService.queriedStrings, ['Technic', 'Technic']);
+  });
 }

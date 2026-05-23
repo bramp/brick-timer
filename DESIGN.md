@@ -98,6 +98,21 @@ The backend sheet relies on a micro-service script to process incoming payloads 
 * A minimal layout designed to be read from a distance. Includes a prominent image of the set and a giant running stopwatch.
 * Primary Controls: Large, easy-to-hit action buttons changing status contextually based on the state machine (Start, Pause, Resume, Complete).
 
+### Material Design Requirements
+
+* Follow Material Design 3 best practices across all Flutter UI screens and components.
+* Prefer built-in Material widgets (for example: `Scaffold`, `AppBar`, `Card`, `ListTile`, `FilledButton`, `SnackBar`) before custom alternatives.
+* Use Material color roles, typography, shape, spacing, and elevation consistently to keep the app accessible and visually coherent.
+* Use clear empty/loading/error states with actionable recovery patterns (for example: pull-to-refresh and retry buttons) instead of raw exception text.
+
+### Testing Requirements
+
+* Every behavior change must include automated tests in the same pull request.
+* Add or update unit tests for business logic and provider/repository behavior.
+* Add or update widget tests for UI state changes and user interactions.
+* Add integration tests when flows cross network, persistence, or multiple screens, or when a regression cannot be confidently covered by unit/widget tests alone.
+* Fixes are not complete until relevant tests pass locally.
+
 ---
 
 ## 6. Phase-by-Phase Vibe Coding Implementation Plan
