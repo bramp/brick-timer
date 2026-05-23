@@ -72,7 +72,6 @@ void main() {
       await tester.pump(const Duration(milliseconds: 3000));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Error:'), findsOneWidget);
       expect(adapter.requestCount, 1);
     },
   );

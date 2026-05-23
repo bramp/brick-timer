@@ -1,12 +1,12 @@
-# System Design Document: BrickTime (LEGO Build Tracker)
+# System Design Document: Brick Timer (LEGO Build Tracker)
 
-This document serves as the comprehensive architectural blueprint and implementation plan for **BrickTime**, a local-first, low-friction Flutter application designed to replace manual spreadsheet tracking for LEGO set assembly.
+This document serves as the comprehensive architectural blueprint and implementation plan for **Brick Timer**, a local-first, low-friction Flutter application designed to replace manual spreadsheet tracking for LEGO set assembly.
 
 ---
 
 ## 1. Executive Summary & Core Objectives
 
-The purpose of BrickTime is to track the exact time it takes to build a LEGO set on a per-bag basis with **zero operational friction**. The app targets a "handfree/dusty-hands" UX, prioritizing giant tap targets, resilient local persistence, and intelligent data aggregation.
+The purpose of Brick Timer is to track the exact time it takes to build a LEGO set on a per-bag basis with **zero operational friction**. The app targets a "handfree/dusty-hands" UX, prioritizing giant tap targets, resilient local persistence, and intelligent data aggregation.
 
 ### Key Workflows
 
@@ -21,7 +21,7 @@ The purpose of BrickTime is to track the exact time it takes to build a LEGO set
 * **Frontend Framework:** Flutter (Cross-platform)
 * **State Management:** Riverpod (Reactive, async-driven architecture)
 * **Local Database:** Drift Database (High-performance SQLite local storage for Flutter)
-* **External Integration:** Rebrickable API v3 (REST)
+* **External Integration:** Rebrickable API v3 (REST) via a future Firebase Serverless Proxy to securely protect API keys using App Check/Authentication.
 * **Spreadsheet Target:** Google Sheets via a lightweight Google Apps Script Webhook (HTTP POST payload)
 
 ---
@@ -114,8 +114,9 @@ The backend sheet relies on a micro-service script to process incoming payloads 
 * Incorporate crash resiliency logic: On app initialization, check for open-ended intervals and automatically resolve them relative to the current time.
 
 ### Phase 3: Networking & Integrations
-
-* Implement the HTTP service to query Rebrickable's endpoint.
+* Define the `LegoCatalogService` interface to support easy swapping of catalog providers.
+* Implement the HTTP service to query Rebrickable's endpoint (using a test key initially).
+* Future: Deploy a Firebase Serverless Proxy to securely handle Rebrickable requests with App Check/Authentication.
 * Build the spreadsheet output service using standard HTTP client calls to process the network payload.
 * Wire the automated background thread trigger that runs every time a bag status moves to absolute completion.
 
