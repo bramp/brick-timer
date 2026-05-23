@@ -56,4 +56,4 @@ final searchResultsProvider = FutureProvider<List<LegoSetsCompanion>>((
 
   final service = ref.read(legoCatalogServiceProvider);
   return service.searchSets(query);
-});
+}, retry: (retryCount, error) => null);
