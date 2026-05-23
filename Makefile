@@ -21,8 +21,8 @@ format:
 	dart format .
 
 analyze:
-	dart analyze .
-	$(APP) && flutter analyze
+	dart analyze --fatal-infos .
+	$(APP) && flutter analyze --fatal-infos
 
 lint: analyze
 
