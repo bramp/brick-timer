@@ -1,0 +1,21 @@
+name: lego_catalog
+description: Generic LEGO catalog client with pluggable backends.
+version: 0.1.0
+publish_to: none
+
+resolution: workspace
+
+environment:
+  sdk: ^3.11.0
+
+executables:
+  lego_catalog: lego_catalog
+
+dependencies:
+  args: ^2.7.0
+  dio: ^5.9.0
+  dio_smart_retry: ^7.0.1
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.26.3
