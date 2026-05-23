@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:brick_timer/services/rebrickable_service.dart';
+import 'package:brick_timer/services/Catalog_Service.dart';
 import 'package:brick_timer/state/search_providers.dart';
 import 'package:brick_timer/ui/search/rebrickable_search_screen.dart';
 import 'package:dio/dio.dart';
@@ -31,7 +31,7 @@ class _MockAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-Widget _buildTestApp(RebrickableService service) {
+Widget _buildTestApp(CatalogService service) {
   return ProviderScope(
     overrides: [
       legoCatalogServiceProvider.overrideWithValue(service),
@@ -62,7 +62,7 @@ void main() {
       final dio = Dio()..httpClientAdapter = adapter;
 
       final backend = RebrickableBackend(apiKey: 'TEST_KEY', dio: dio);
-      final service = RebrickableService(apiKey: 'TEST_KEY', backend: backend);
+      final service = CatalogService(backend: backend);
 
       await tester.pumpWidget(_buildTestApp(service));
 

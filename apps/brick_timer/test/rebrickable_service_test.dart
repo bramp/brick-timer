@@ -1,4 +1,4 @@
-import 'package:brick_timer/services/rebrickable_service.dart';
+import 'package:brick_timer/services/Catalog_Service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lego_catalog/lego_catalog.dart';
 
@@ -31,10 +31,9 @@ class _FakeBackend implements LegoCatalogBackend {
 }
 
 void main() {
-  group('RebrickableService.searchSets', () {
+  group('CatalogService.searchSets', () {
     test('maps backend search results to drift companions', () async {
-      final service = RebrickableService(
-        apiKey: 'TEST_KEY',
+      final service = CatalogService(
         backend: _FakeBackend(
           searchResult: const [
             LegoSetSummary(
@@ -55,9 +54,9 @@ void main() {
       expect(results.first.totalPieces.value, 3696);
     });
 
-    test('throws when API key is missing', () async {
+    test('rebrickable factory throws when API key is missing', () async {
       await expectLater(
-        () async => RebrickableService(
+        () async => CatalogService.rebrickable(
           apiKey: '   ',
         ),
         throwsA(isA<StateError>()),
@@ -65,8 +64,7 @@ void main() {
     });
 
     test('propagates backend errors', () async {
-      final service = RebrickableService(
-        apiKey: 'TEST_KEY',
+      final service = CatalogService(
         backend: _FakeBackend(
           searchError: const CatalogHttpException(
             message: 'Unauthorized',
@@ -82,10 +80,9 @@ void main() {
     });
   });
 
-  group('RebrickableService.getSetDetails', () {
+  group('CatalogService.getSetDetails', () {
     test('maps backend details to drift companion', () async {
-      final service = RebrickableService(
-        apiKey: 'TEST_KEY',
+      final service = CatalogService(
         backend: _FakeBackend(
           detailsResult: const LegoSetDetails(
             setNumber: '42096-1',
@@ -104,10 +101,7 @@ void main() {
     });
 
     test('returns null when set does not exist', () async {
-      final service = RebrickableService(
-        apiKey: 'TEST_KEY',
-        backend: _FakeBackend(),
-      );
+      final service = CatalogService(backend: _FakeBackend());
 
       expect(await service.getSetDetails('missing-set'), isNull);
     });

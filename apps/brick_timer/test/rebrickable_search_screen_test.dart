@@ -1,12 +1,12 @@
 import 'package:brick_timer/repositories/ledger_repository.dart';
-import 'package:brick_timer/services/lego_catalog_service.dart';
+import 'package:brick_timer/services/Catalog_Service.dart';
 import 'package:brick_timer/state/search_providers.dart';
 import 'package:brick_timer/ui/search/rebrickable_search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class FakeCatalogService implements LegoCatalogService {
+class FakeCatalogService implements CatalogService {
   FakeCatalogService({
     this.shouldThrow = false,
     List<LegoSetsCompanion>? results,
@@ -29,7 +29,7 @@ class FakeCatalogService implements LegoCatalogService {
   }
 }
 
-Widget _buildTestApp(LegoCatalogService catalogService) {
+Widget _buildTestApp(CatalogService catalogService) {
   return ProviderScope(
     overrides: [
       legoCatalogServiceProvider.overrideWithValue(catalogService),

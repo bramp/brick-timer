@@ -2,14 +2,13 @@ import 'dart:async';
 
 import 'package:brick_timer/env/env.dart';
 import 'package:brick_timer/repositories/ledger_repository.dart';
-import 'package:brick_timer/services/lego_catalog_service.dart';
-import 'package:brick_timer/services/rebrickable_service.dart';
+import 'package:brick_timer/services/Catalog_Service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Provider for the LEGO Catalog API service.
-final legoCatalogServiceProvider = Provider<LegoCatalogService>((ref) {
+final legoCatalogServiceProvider = Provider<CatalogService>((ref) {
   // TODO(bramp): Later swap this to FirebaseProxyService
-  return RebrickableService(apiKey: Env.rebrickableApiKey);
+  return CatalogService.rebrickable(apiKey: Env.rebrickableApiKey);
 });
 
 /// The current search query.

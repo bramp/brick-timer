@@ -1,15 +1,18 @@
 import 'package:brick_timer/repositories/ledger_repository.dart';
-import 'package:brick_timer/services/rebrickable_service.dart';
+import 'package:brick_timer/services/Catalog_Service.dart';
 import 'package:brick_timer/state/search_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// A simple mock to track how many times the API was actually hit.
-class MockRebrickableService extends RebrickableService {
-  MockRebrickableService() : super(apiKey: 'TEST');
-
+class MockCatalogService implements CatalogService {
   int searchSetsCallCount = 0;
-  List<String> queriedStrings = [];
+  final queriedStrings = <String>[];
+
+  @override
+  Future<LegoSetsCompanion?> getSetDetails(String setNumber) async {
+    return null;
+  }
 
   @override
   Future<List<LegoSetsCompanion>> searchSets(String query) async {
@@ -23,7 +26,7 @@ void main() {
   test(
     'searchResultsProvider debounces queries and cancels old requests',
     () async {
-      final mockService = MockRebrickableService();
+      final mockService = MockCatalogService();
       final container = ProviderContainer(
         overrides: [
           legoCatalogServiceProvider.overrideWithValue(mockService),
@@ -60,7 +63,7 @@ void main() {
   );
 
   test('searchResultsProvider ignores repeated normalized queries', () async {
-    final mockService = MockRebrickableService();
+    final mockService = MockCatalogService();
     final container = ProviderContainer(
       overrides: [
         legoCatalogServiceProvider.overrideWithValue(mockService),

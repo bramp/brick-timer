@@ -126,4 +126,60 @@ void main() {
       expect(adapter.requestCount, 1);
     });
   });
+
+  group('RebrickableBackend.getSetDetails', () {
+    test('normalizes set number by appending default version suffix', () async {
+      final adapter = _MockAdapter((request) async {
+        expect(request.path, '/sets/42096-1/');
+        return ResponseBody.fromString(
+          jsonEncode({
+            'set_num': '42096-1',
+            'name': 'Porsche 911 RSR',
+            'num_parts': 1580,
+            'set_img_url': 'https://example.com/42096.jpg',
+          }),
+          200,
+          headers: {
+            Headers.contentTypeHeader: ['application/json'],
+          },
+        );
+      });
+
+      final dio = Dio()..httpClientAdapter = adapter;
+      final backend = RebrickableBackend(apiKey: 'TEST_KEY', dio: dio);
+
+      final details = await backend.getSetDetails('42096');
+
+      expect(details, isNotNull);
+      expect(details!.setNumber, '42096-1');
+      expect(adapter.requestCount, 1);
+    });
+
+    test('keeps explicit set version when suffix is already present', () async {
+      final adapter = _MockAdapter((request) async {
+        expect(request.path, '/sets/42096-3/');
+        return ResponseBody.fromString(
+          jsonEncode({
+            'set_num': '42096-3',
+            'name': 'Porsche 911 RSR',
+            'num_parts': 1580,
+            'set_img_url': null,
+          }),
+          200,
+          headers: {
+            Headers.contentTypeHeader: ['application/json'],
+          },
+        );
+      });
+
+      final dio = Dio()..httpClientAdapter = adapter;
+      final backend = RebrickableBackend(apiKey: 'TEST_KEY', dio: dio);
+
+      final details = await backend.getSetDetails('42096-3');
+
+      expect(details, isNotNull);
+      expect(details!.setNumber, '42096-3');
+      expect(adapter.requestCount, 1);
+    });
+  });
 }
