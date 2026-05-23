@@ -24,7 +24,7 @@ class _RebrickableSearchScreenState
     ref.invalidate(searchResultsProvider);
     try {
       await ref.read(searchResultsProvider.future);
-    } catch (_) {
+    } on Exception {
       // The error state is rendered in the UI; swallow to complete refresh.
     }
   }
@@ -106,7 +106,9 @@ class _RebrickableSearchScreenState
                               _showErrorDetails = !_showErrorDetails;
                             });
                           },
-                          child: Text(_showErrorDetails ? 'Hide details' : 'Advanced'),
+                          child: Text(
+                            _showErrorDetails ? 'Hide details' : 'Advanced',
+                          ),
                         ),
                         FilledButton.icon(
                           onPressed: () => _refreshSearchResults(ref),
@@ -117,7 +119,9 @@ class _RebrickableSearchScreenState
                     ),
                     if (_showErrorDetails) ...[
                       const SizedBox(height: 12),
-                      Divider(color: Theme.of(context).colorScheme.outlineVariant),
+                      Divider(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         'Technical details',
@@ -145,10 +149,12 @@ class _RebrickableSearchScreenState
         return 'Search is not authorized right now. Please try again later.';
       }
       if (error.statusCode == 429) {
-        return 'Too many requests right now. Please wait a moment and try again.';
+        return 'Too many requests right now. '
+            'Please wait a moment and try again.';
       }
       if (error.statusCode != null && error.statusCode! >= 500) {
-        return 'The catalog service is temporarily unavailable. Please try again.';
+        return 'The catalog service is temporarily unavailable. '
+            'Please try again.';
       }
     }
 
@@ -207,105 +213,110 @@ class _RebrickableSearchScreenState
         child: RefreshIndicator(
           onRefresh: () => _refreshSearchResults(ref),
           child: searchResults.when(
-          data: (results) {
-            if (results.isEmpty) {
-              if (query.trim().isNotEmpty) {
+            data: (results) {
+              if (results.isEmpty) {
+                if (query.trim().isNotEmpty) {
+                  return _buildScrollableMessage(
+                    context: context,
+                    icon: Icons.search_off,
+                    title: 'No sets found',
+                    message:
+                        'Try another set number or name, '
+                        'or pull down to search again.',
+                  );
+                }
                 return _buildScrollableMessage(
                   context: context,
-                  icon: Icons.search_off,
-                  title: 'No sets found',
+                  icon: Icons.toys_outlined,
+                  title: 'Find your next build',
                   message:
-                      'Try another set number or name, or pull down to search again.',
+                      'Type a set number or name to search Rebrickable. '
+                      'You can pull down anytime to refresh.',
                 );
               }
-              return _buildScrollableMessage(
-                context: context,
-                icon: Icons.toys_outlined,
-                title: 'Find your next build',
-                message:
-                    'Type a set number or name to search Rebrickable. You can pull down anytime to refresh.',
-              );
-            }
 
-            return ListView.separated(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
-              itemCount: results.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
-              itemBuilder: (context, index) {
-                final setCompanion = results[index];
-                return Card(
-                  clipBehavior: Clip.antiAlias,
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    leading:
-                        setCompanion.imageUrl.present &&
-                            setCompanion.imageUrl.value != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              setCompanion.imageUrl.value!,
-                              width: 56,
-                              height: 56,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, _, _) => const SizedBox(
+              return ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+                itemCount: results.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  final setCompanion = results[index];
+                  return Card(
+                    clipBehavior: Clip.antiAlias,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      leading:
+                          setCompanion.imageUrl.present &&
+                              setCompanion.imageUrl.value != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                setCompanion.imageUrl.value!,
                                 width: 56,
                                 height: 56,
-                                child: Icon(Icons.image_not_supported_outlined),
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => const SizedBox(
+                                  width: 56,
+                                  height: 56,
+                                  child:
+                                      Icon(Icons.image_not_supported_outlined),
+                                ),
                               ),
+                            )
+                          : const SizedBox(
+                              width: 56,
+                              height: 56,
+                              child: Icon(Icons.category_outlined),
                             ),
-                          )
-                        : const SizedBox(
-                            width: 56,
-                            height: 56,
-                            child: Icon(Icons.category_outlined),
-                          ),
-                    title: Text(
-                      setCompanion.name.value,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: Text(
-                      'Set #${setCompanion.setNumber.value} • '
-                      '${setCompanion.totalPieces.value} parts',
-                    ),
-                    trailing: const Icon(Icons.add_circle_outline),
-                    onTap: () async {
-                      // Save set to local database
-                      final setId = await ledgerRepository.saveLegoSet(
-                        setCompanion,
-                      );
-                      if (!context.mounted) return;
-
-                      // Retrieve the saved LegoSet data class
-                      final savedSet = await ledgerRepository.getLegoSet(setId);
-                      if (savedSet != null && context.mounted) {
-                        // Start a new session
-                        await ref
-                            .read(activeSessionProvider.notifier)
-                            .startNewSession(savedSet);
-
+                      title: Text(
+                        setCompanion.name.value,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        'Set #${setCompanion.setNumber.value} • '
+                        '${setCompanion.totalPieces.value} parts',
+                      ),
+                      trailing: const Icon(Icons.add_circle_outline),
+                      onTap: () async {
+                        // Save set to local database
+                        final setId = await ledgerRepository.saveLegoSet(
+                          setCompanion,
+                        );
                         if (!context.mounted) return;
-                        // Return to dashboard
-                        Navigator.of(context).pop();
-                      }
-                    },
-                  ),
-                );
-              },
-            );
-          },
-          loading: () => ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: const [
-              SizedBox(height: 160),
-              Center(child: CircularProgressIndicator()),
-            ],
-          ),
-          error: (error, _) => _buildErrorPanel(context, error),
+
+                        // Retrieve the saved LegoSet data class
+                        final savedSet = await ledgerRepository.getLegoSet(
+                          setId,
+                        );
+                        if (savedSet != null && context.mounted) {
+                          // Start a new session
+                          await ref
+                              .read(activeSessionProvider.notifier)
+                              .startNewSession(savedSet);
+
+                          if (!context.mounted) return;
+                          // Return to dashboard
+                          Navigator.of(context).pop();
+                        }
+                      },
+                    ),
+                  );
+                },
+              );
+            },
+            loading: () => ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 160),
+                Center(child: CircularProgressIndicator()),
+              ],
+            ),
+            error: (error, _) => _buildErrorPanel(context, error),
           ),
         ),
       ),

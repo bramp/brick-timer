@@ -1,5 +1,4 @@
 import 'package:envied/envied.dart';
-import 'package:meta/meta.dart';
 
 part 'env.g.dart';
 
@@ -41,7 +40,7 @@ abstract class Env {
     return normalized;
   }
 
-  @visibleForTesting
+  /// Normalizes a raw API key value for unit tests and diagnostics.
   static String normalizeApiKeyForTesting(String rawApiKey) {
     return _normalizeApiKey(rawApiKey);
   }

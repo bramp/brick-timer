@@ -159,10 +159,19 @@ class $LegoSetsTable extends LegoSets with TableInfo<$LegoSetsTable, LegoSet> {
 }
 
 class LegoSet extends DataClass implements Insertable<LegoSet> {
+  /// Primary key for a stored set.
   final int id;
+
+  /// Set number (for example, 42115-1).
   final String setNumber;
+
+  /// Human-readable set name.
   final String name;
+
+  /// Number of pieces in the set.
   final int totalPieces;
+
+  /// Optional remote image URL for the set.
   final String? imageUrl;
   const LegoSet({
     required this.id,
@@ -495,9 +504,16 @@ class $BuildSessionsTable extends BuildSessions
 }
 
 class BuildSession extends DataClass implements Insertable<BuildSession> {
+  /// Primary key for the build session.
   final int id;
+
+  /// Foreign key to [LegoSets].
   final int legoSetId;
+
+  /// Timestamp when this build was started.
   final DateTime startDate;
+
+  /// Whether this build session has been completed.
   final bool isCompleted;
   const BuildSession({
     required this.id,
@@ -884,12 +900,25 @@ class $BagIntervalsTable extends BagIntervals
 }
 
 class BagInterval extends DataClass implements Insertable<BagInterval> {
+  /// Primary key for the recorded bag interval.
   final int id;
+
+  /// Foreign key to [BuildSessions].
   final int buildSessionId;
+
+  /// Bag number from the set instructions.
   final int bagNumber;
+
+  /// Timestamp when the timer interval started.
   final DateTime startTime;
+
+  /// Optional timestamp when the timer interval ended.
   final DateTime? endTime;
+
+  /// Whether this bag interval has been completed.
   final bool isCompleted;
+
+  /// Whether this interval has been synced to remote storage.
   final bool isSynced;
   const BagInterval({
     required this.id,
