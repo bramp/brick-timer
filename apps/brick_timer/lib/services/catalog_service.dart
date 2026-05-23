@@ -1,22 +1,20 @@
 import 'package:brick_timer/repositories/ledger_repository.dart';
-import 'package:brick_timer/services/lego_catalog_service.dart';
 import 'package:drift/drift.dart';
 import 'package:lego_catalog/lego_catalog.dart';
 
 /// App adapter that maps generic catalog models to drift companions.
-// TODO We can remove this now, since this abstraction moved into packages/lego_catalog. We should have a similar service, that wraps the lego_catalog, but also provides caching, etc.
-class RebrickableService implements LegoCatalogService {
-  /// Creates a catalog adapter using the provided backend or Rebrickable.
-  RebrickableService({
-    required String apiKey,
-    LegoCatalogBackend? backend,
-  }) : _backend = backend ?? RebrickableBackend(apiKey: apiKey);
+class CatalogService {
+  /// Creates a catalog adapter from an external catalog backend.
+  CatalogService({required LegoCatalogBackend backend}) : _backend = backend;
+
+  /// Creates a catalog adapter backed by Rebrickable.
+  factory CatalogService.rebrickable({required String apiKey}) {
+    return CatalogService(backend: RebrickableBackend(apiKey: apiKey));
+  }
 
   final LegoCatalogBackend _backend;
 
   /// Fetches LEGO set details by its set number.
-  /// Note: Rebrickable usually requires a '-1' suffix for standard sets.
-  @override
   Future<LegoSetsCompanion?> getSetDetails(String setNumber) async {
     final details = await _backend.getSetDetails(setNumber);
     if (details == null) {
@@ -32,7 +30,6 @@ class RebrickableService implements LegoCatalogService {
   }
 
   /// Searches for LEGO sets by text query.
-  @override
   Future<List<LegoSetsCompanion>> searchSets(String query) async {
     final results = await _backend.searchSets(query);
     return results.map((set) {
