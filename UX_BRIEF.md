@@ -149,8 +149,53 @@ Suggested layout:
 Behavior notes:
 
 * The current state must be obvious without reading instructions.
-* The primary action changes with the state: Start, Pause, Resume, Complete.
+* The top card color and title chip color change by state.
+* Use consistent state language:
+	* Starting
+	* Building Bag N
+	* Building Bag N - Paused
+	* Bag N Finished
+	* Finished
+* The quick action row should always include:
+	* Start Next Bag
+	* Bag Finished
+	* Pause or Resume (single toggle button)
+* A right-aligned action should end the whole set: Finished Set!
+* Duration is total elapsed time for the whole set, not only the current bag.
+* Current bag can be shown as Bag X of N, or Bag X of ? when total bag count is unknown.
 * Controls should stay within thumb reach on phones.
+
+Multi-set behavior:
+
+* The dashboard may show more than one active set.
+* Any active card can become the control focus when the user taps an action.
+* One focused timer context is active at a time, but multiple set sessions may remain open.
+
+State transitions (DOT):
+
+```dot
+digraph ActiveBuildState {
+	rankdir=LR;
+	node [shape=box, style="rounded,filled", fillcolor="#F7FDFF", color="#7AA7C7"];
+
+	Starting [label="Starting"];
+	Building [label="Building Bag N"];
+	Paused [label="Building Bag N - Paused"];
+	BagFinished [label="Bag N Finished"];
+	Finished [label="Finished"];
+
+	Starting -> Building [label="Start Bag 1"];
+	Building -> Paused [label="Pause"];
+	Paused -> Building [label="Resume"];
+	Building -> BagFinished [label="Bag Finished"];
+	Paused -> BagFinished [label="Bag Finished"];
+	BagFinished -> Building [label="Start Next Bag"];
+	Starting -> Finished [label="Finished Set!"];
+	Building -> Finished [label="Finished Set!"];
+	Paused -> Finished [label="Finished Set!"];
+	BagFinished -> Finished [label="Finished Set!"];
+}
+```
 
 ## State Design
 
