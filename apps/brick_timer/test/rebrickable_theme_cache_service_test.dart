@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 class _FakeCacheManager implements BaseCacheManager {
   _FakeCacheManager({required this.cachedPayload})
-      : fileSystem = MemoryFileSystem();
+    : fileSystem = MemoryFileSystem();
 
   final MemoryFileSystem fileSystem;
   final String cachedPayload;

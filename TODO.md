@@ -31,6 +31,7 @@
 ## Phase 4: Interface & Polish
 - [x] Construct Dashboard UI (In-Progress builds, historic stats, Cloud Sync Status Widget, FAB to start new build).
 - [ ] Construct Rebrickable Search Portal (Search text field with 500ms debounce, dynamic list with thumbnails).
+- [ ] Revisit LEGO catalog search pagination so the backend can return an opaque "more pages" token and the UI can load more results as needed, instead of relying on a single filtered page.
 - [ ] Construct Active Build Workspace (Prominent image, giant running stopwatch, Start/Pause/Resume/Complete buttons).
 - [ ] Add manual adjustments ("Oops, forgot to start" offset controls).
 - [ ] Add simple line/bar visual charts for tracking bricks-per-minute trends.

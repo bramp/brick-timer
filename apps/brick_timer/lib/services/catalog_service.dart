@@ -76,7 +76,7 @@ class CatalogService {
   /// mostly returns non-buildable items (storage, accessories, books, etc.).
   Future<List<LegoSetsCompanion>> searchSets(
     String query, {
-    int pageSize = 20,
+    int pageSize = 50,
     int minParts = 1,
     Set<int> excludedThemeRootIds = const {501},
     bool includeDescendantThemesInExclusion = true,

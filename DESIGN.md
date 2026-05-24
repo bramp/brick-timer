@@ -92,6 +92,7 @@ The backend sheet relies on a micro-service script to process incoming payloads 
 
 * A search text field with an aggressive 500ms debounce to prevent API thrashing.
 * A dynamic list displaying query match options containing thumbnail art, formal set titles, and total brick counts. Clicking an element instantiates the local DB session.
+* Future iteration: switch this screen to a paged/infinite-scroll model so locally filtered pages can continue loading when the backend still has more results.
 
 ### Screen 3: The Active Build Workspace
 
@@ -112,6 +113,11 @@ The backend sheet relies on a micro-service script to process incoming payloads 
 * Add or update widget tests for UI state changes and user interactions.
 * Add integration tests when flows cross network, persistence, or multiple screens, or when a regression cannot be confidently covered by unit/widget tests alone.
 * Fixes are not complete until relevant tests pass locally.
+
+### Search Result Strategy Note
+
+* The current search flow intentionally favors a simpler single-page request with a larger page size.
+* If local filtering starts hiding too many items, the next step should be to introduce an opaque pagination token in `packages/lego_catalog` and teach the Flutter search screen to load more pages on scroll.
 
 ---
 
