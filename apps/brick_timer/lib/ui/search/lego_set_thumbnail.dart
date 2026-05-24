@@ -1,5 +1,6 @@
 import 'package:brick_timer/services/lego_set_image_cache_manager.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
@@ -30,6 +31,27 @@ class LegoSetThumbnail extends StatelessWidget {
         width: size,
         height: size,
         child: const Icon(Icons.category_outlined),
+      );
+    }
+
+    if (kIsWeb) {
+      // Use an HTML <img> element on web to avoid CORS-blocked fetches from
+      // image CDNs that do not send Access-Control-Allow-Origin headers.
+      return SizedBox(
+        width: size,
+        height: size,
+        child: Image.network(
+          imageUrl!,
+          fit: BoxFit.cover,
+          width: size,
+          height: size,
+          webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+          errorBuilder: (_, _, _) => SizedBox(
+            width: size,
+            height: size,
+            child: const Icon(Icons.image_not_supported_outlined),
+          ),
+        ),
       );
     }
 
