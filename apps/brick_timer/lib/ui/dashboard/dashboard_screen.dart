@@ -41,9 +41,9 @@ class DashboardScreen extends ConsumerWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
+              Theme.of(context).scaffoldBackgroundColor,
               Theme.of(context).colorScheme.surface,
-              const Color(0xFFF5FCFF),
-              const Color(0xFFEAF8FF),
+              const Color(0xFFDFF4FB),
             ],
           ),
         ),
@@ -254,7 +254,7 @@ class _EmptyBuildCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFF6FCFF), Color(0xFFE8F5FF)],
+          colors: [Color(0xFFE4F8FF), Color(0xFFD1EFFB)],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: theme.colorScheme.outlineVariant),
@@ -332,7 +332,7 @@ class _RecentBuildCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFF7FDFF), Color(0xFFEDF8FF)],
+            colors: [Color(0xFFE7F8FF), Color(0xFFD7F0FF)],
           ),
         ),
         child: Padding(

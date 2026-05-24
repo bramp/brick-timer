@@ -77,24 +77,24 @@ class ActiveBuildCard extends ConsumerWidget {
     };
     final cardGradient = switch (uiState) {
       _ActiveBuildUiState.finished => const [
-        Color(0xFFF3F5F7),
-        Color(0xFFE9EEF2),
+        Color(0xFFE2F2FB),
+        Color(0xFFCFE6F4),
       ],
       _ActiveBuildUiState.paused => const [
-        Color(0xFFFFF8EA),
-        Color(0xFFFFEECC),
+        Color(0xFFFFE4B8),
+        Color(0xFFFFD47A),
       ],
       _ActiveBuildUiState.building => const [
-        Color(0xFFEFFFF6),
-        Color(0xFFDDF8EA),
+        Color(0xFFD4F7E8),
+        Color(0xFFBEEFD9),
       ],
       _ActiveBuildUiState.bagFinished => const [
-        Color(0xFFF0FAFF),
-        Color(0xFFDFF3FF),
+        Color(0xFFD9F1FF),
+        Color(0xFFC2E6FF),
       ],
       _ActiveBuildUiState.starting => const [
-        Color(0xFFF7FDFF),
-        Color(0xFFEAF7FF),
+        Color(0xFFE0F8FF),
+        Color(0xFFCDEFFF),
       ],
     };
     final primaryStatusLabel = switch ((uiState, currentBag)) {
@@ -268,10 +268,14 @@ class ActiveBuildCard extends ConsumerWidget {
                             await notifier.completeBag();
                           }
                         : null,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: theme.scaffoldBackgroundColor,
+                      foregroundColor: theme.colorScheme.onSurface,
+                    ),
                     icon: const Icon(Icons.check_circle_outline),
                     label: const Text('Bag Finished'),
                   ),
-                  OutlinedButton.icon(
+                  FilledButton.tonalIcon(
                     onPressed: canPauseResume
                         ? () async {
                             final notifier = ref.read(
@@ -290,6 +294,10 @@ class ActiveBuildCard extends ConsumerWidget {
                             }
                           }
                         : null,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: theme.scaffoldBackgroundColor,
+                      foregroundColor: theme.colorScheme.onSurface,
+                    ),
                     icon: Icon(
                       status == TimerStatus.running
                           ? Icons.pause_circle_outline
