@@ -88,16 +88,24 @@ app-splash: app-pngs
 
 app-assets: app-icons app-splash
 
-# CI-friendly check: fail if source SVGs are newer than generated PNG inputs.
+# CI-friendly check: fail if the SVG source was modified after the generated PNG.
 check-app-artwork-mtime:
 	@test -f "$(ICON_PNG)" || (echo "Missing generated file: $(ICON_PNG). Run 'make app-assets'." && exit 1)
 	@test -f "$(SPLASH_PNG)" || (echo "Missing generated file: $(SPLASH_PNG). Run 'make app-assets'." && exit 1)
-	@if [ "$(ICON_SVG)" -nt "$(ICON_PNG)" ]; then \
-		echo "$(ICON_SVG) is newer than $(ICON_PNG). Run 'make app-assets' and commit outputs."; \
+	@icon_svg_ts="$$(git log -1 --format=%ct -- "$(ICON_SVG)" 2>/dev/null)"; \
+	icon_png_ts="$$(git log -1 --format=%ct -- "$(ICON_PNG)" 2>/dev/null)"; \
+	splash_svg_ts="$$(git log -1 --format=%ct -- "$(SPLASH_SVG)" 2>/dev/null)"; \
+	splash_png_ts="$$(git log -1 --format=%ct -- "$(SPLASH_PNG)" 2>/dev/null)"; \
+	if [ -z "$$icon_svg_ts" ] || [ -z "$$icon_png_ts" ] || [ -z "$$splash_svg_ts" ] || [ -z "$$splash_png_ts" ]; then \
+		echo "Unable to read git history for artwork files. Run this in a git checkout with tracked files."; \
 		exit 1; \
-	fi
-	@if [ "$(SPLASH_SVG)" -nt "$(SPLASH_PNG)" ]; then \
-		echo "$(SPLASH_SVG) is newer than $(SPLASH_PNG). Run 'make app-assets' and commit outputs."; \
+	fi; \
+	if [ "$$icon_svg_ts" -gt "$$icon_png_ts" ]; then \
+		echo "$(ICON_SVG) is newer than $(ICON_PNG) in git history. Run 'make app-assets' and commit outputs."; \
 		exit 1; \
-	fi
-	@echo "Artwork mtime check passed."
+	fi; \
+	if [ "$$splash_svg_ts" -gt "$$splash_png_ts" ]; then \
+		echo "$(SPLASH_SVG) is newer than $(SPLASH_PNG) in git history. Run 'make app-assets' and commit outputs."; \
+		exit 1; \
+	fi; \
+	echo "Artwork git-history check passed."
