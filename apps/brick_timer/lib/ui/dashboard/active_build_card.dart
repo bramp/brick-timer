@@ -1,7 +1,6 @@
 import 'package:brick_timer/main.dart';
 import 'package:brick_timer/repositories/ledger_repository.dart';
 import 'package:brick_timer/state/active_session_notifier.dart';
-import 'package:brick_timer/ui/search/lego_catalog_search_screen.dart';
 import 'package:brick_timer/ui/search/lego_set_thumbnail.dart';
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/material.dart';
@@ -61,7 +60,7 @@ class ActiveBuildCard extends ConsumerWidget {
     final bagLabel = switch ((currentBag, totalBags)) {
       (null, _) => 'Not started',
       (final int bag, final int total) => 'Bag $bag of $total',
-      (final int bag, null) => 'Bag $bag of ?',
+      (final int bag, null) => 'Bag $bag',
     };
     final timerLabel = _formatDuration(
       timerState?.totalElapsed ?? Duration.zero,
@@ -95,14 +94,16 @@ class ActiveBuildCard extends ConsumerWidget {
         Color(0xFFEAF7FF),
       ],
     };
-    final stateLabel = switch ((uiState, currentBag)) {
+    final primaryStatusLabel = switch ((uiState, currentBag)) {
       (_ActiveBuildUiState.finished, _) => 'Finished',
       (_ActiveBuildUiState.building, final int bag) => 'Building Bag $bag',
-      (_ActiveBuildUiState.paused, final int bag) =>
-        'Building Bag $bag - Paused',
+      (_ActiveBuildUiState.paused, final int bag) => 'Building Bag $bag',
       (_ActiveBuildUiState.bagFinished, final int bag) => 'Bag $bag Finished',
       _ => 'Starting',
     };
+    final secondaryStatusLabel = uiState == _ActiveBuildUiState.paused
+        ? 'Paused'
+        : null;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -148,26 +149,32 @@ class ActiveBuildCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Flexible(
+                            Expanded(
                               child: Text(
-                                'Current build',
-                                style: theme.textTheme.labelLarge?.copyWith(
-                                  color: theme.colorScheme.secondary,
-                                  fontWeight: FontWeight.w700,
+                                set.name,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
                                 ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             const SizedBox(width: 8),
-                            _StatusPill(label: stateLabel),
+                            Flexible(
+                              child: Wrap(
+                                alignment: WrapAlignment.end,
+                                spacing: 8,
+                                runSpacing: 6,
+                                children: [
+                                  _StatusPill(label: primaryStatusLabel),
+                                  if (secondaryStatusLabel != null)
+                                    _StatusPill(label: secondaryStatusLabel),
+                                ],
+                              ),
+                            ),
                           ],
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          set.name,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -306,18 +313,6 @@ class ActiveBuildCard extends ConsumerWidget {
                     },
                     icon: const Icon(Icons.receipt_long_outlined),
                     label: const Text('Details'),
-                  ),
-                  const SizedBox(width: 8),
-                  TextButton.icon(
-                    onPressed: () async {
-                      await Navigator.of(context).push<void>(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const LegoCatalogSearchScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.open_in_new),
-                    label: const Text('Build search'),
                   ),
                   const Spacer(),
                   FutureBuilder<bool>(
