@@ -1,15 +1,21 @@
 repos:
   - repo: local
     hooks:
-      - id: dart-format
-        name: dart format
-        entry: dart format
+      - id: make-format
+        name: make format
+        entry: make format
         language: system
-        types: [dart]
-        pass_filenames: true
+        pass_filenames: false
+        always_run: true
+      - id: make-lint
+        name: make lint
+        entry: make lint
+        language: system
+        pass_filenames: false
+        always_run: true
       - id: app-artwork-mtime
         name: check app artwork mtimes
         entry: make check-app-artwork-mtime
         language: system
-        files: ^(artwork/.*\.(svg|png|jpe?g)|apps/brick_timer/assets/.*\.(png|jpe?g))$
+        files: '^(artwork/.*\.(svg|png|jpe?g)|apps/brick_timer/assets/.*\.(png|jpe?g))$'
         pass_filenames: false

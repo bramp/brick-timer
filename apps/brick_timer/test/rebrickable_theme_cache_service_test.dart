@@ -139,7 +139,6 @@ void main() {
         throw Exception('network down');
       },
       cacheManager: cacheManager,
-      ttl: const Duration(days: 7),
       now: () => now,
     );
 

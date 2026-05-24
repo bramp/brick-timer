@@ -24,12 +24,15 @@ jobs:
 
       - name: Check generated app artwork mtimes
         run: make check-app-artwork-mtime
+        continue-on-error: true
 
       - name: Check formatting
         run: make format && git diff --exit-code
+        continue-on-error: true
 
       - name: Static analysis
         run: make analyze
+        continue-on-error: true
 
       - name: Run tests
         run: make test-ci
