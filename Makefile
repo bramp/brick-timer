@@ -1,6 +1,6 @@
 # Flutter Template Makefile
 
-.PHONY: all run format analyze lint test test-ci fix upgrade clean app-artwork app-icons app-splash app-assets check-app-artwork-mtime app-pngs
+.PHONY: all run format analyze lint test test-ci fix upgrade clean app-artwork app-icons app-splash app-assets check-app-artwork-mtime app-pngs precommit-install
 
 # Device to run on: chrome, macos, ios, android (default: chrome)
 DEVICE ?= chrome
@@ -10,6 +10,8 @@ WEB_PORT ?= 3000
 # Shorthand for running commands in the app directory
 APP = cd apps/brick_timer
 CATALOG = cd packages/lego_catalog
+PRECOMMIT_VENV = .venv/pre-commit
+PRECOMMIT_BIN = $(PRECOMMIT_VENV)/bin/pre-commit
 
 ARTWORK_DIR = artwork
 APP_DIR = apps/brick_timer
@@ -34,6 +36,15 @@ analyze:
 	$(APP) && flutter analyze --fatal-infos
 
 lint: analyze
+
+precommit-install:
+	@if [ -x "$(PRECOMMIT_BIN)" ]; then \
+		echo "pre-commit is already installed"; \
+	else \
+		python3 -m venv "$(PRECOMMIT_VENV)"; \
+		"$(PRECOMMIT_VENV)/bin/pip" install pre-commit; \
+	fi
+	@"$(PRECOMMIT_BIN)" install
 
 test:
 	$(APP) && flutter test
