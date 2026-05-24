@@ -1,6 +1,7 @@
 import 'package:brick_timer/state/dashboard_providers.dart';
 import 'package:brick_timer/ui/dashboard/sync_status_widget.dart';
 import 'package:brick_timer/ui/search/lego_catalog_search_screen.dart';
+import 'package:brick_timer/ui/search/lego_set_thumbnail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -68,14 +69,13 @@ class DashboardScreen extends ConsumerWidget {
                           vertical: 8,
                         ),
                         child: ListTile(
-                          leading: set.imageUrl != null
-                              ? Image.network(
-                                  set.imageUrl!,
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                )
-                              : const Icon(Icons.category, size: 50),
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: LegoSetThumbnail(
+                              imageUrl: set.imageUrl,
+                              size: 50,
+                            ),
+                          ),
                           title: Text(set.name),
                           subtitle: Text(
                             'Set #${set.setNumber} - Started '
