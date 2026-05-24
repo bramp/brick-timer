@@ -1,9 +1,11 @@
 # Flutter Template Makefile
 
-.PHONY: all run format analyze lint test test-ci fix upgrade clean app-artwork app-icons app-splash app-assets check-app-artwork-mtime app-pngs precommit-install
+.PHONY: all run format analyze lint test test-ci test-user-journeys fix upgrade clean app-artwork app-icons app-splash app-assets check-app-artwork-mtime app-pngs precommit-install
 
 # Device to run on: chrome, macos, ios, android (default: chrome)
 DEVICE ?= chrome
+# Integration test device. Defaults to host platform (macOS uses macos; others use chrome).
+TEST_DEVICE ?= $(shell if [ "$$(uname -s)" = "Darwin" ]; then echo macos; else echo chrome; fi)
 # Port for Flutter web dev server
 WEB_PORT ?= 3000
 
@@ -50,8 +52,16 @@ test:
 	$(APP) && flutter test
 	$(CATALOG) && dart test
 
+## Run cross-platform user journey integration tests.
+## Use DEVICE=macos, DEVICE=android, or DEVICE=chrome.
+test-user-journeys:
+	$(APP) && flutter test integration_test/build_primary_flows_test.dart -d $(DEVICE)
+
 test-ci:
 	$(APP) && flutter test --reporter=compact
+	$(APP) && for f in integration_test/*_test.dart; do \
+		flutter test "$$f" --reporter=compact -d $(TEST_DEVICE) || exit $$?; \
+	done
 	$(CATALOG) && dart test --reporter=compact
 
 fix:
