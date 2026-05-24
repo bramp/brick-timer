@@ -6,18 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lego_catalog/lego_catalog.dart';
 
-/// Screen for searching and adding new LEGO sets from Rebrickable.
-class RebrickableSearchScreen extends ConsumerStatefulWidget {
-  /// Creates a new [RebrickableSearchScreen].
-  const RebrickableSearchScreen({super.key});
+/// Screen for searching and adding new LEGO sets from the catalog backend.
+class LegoCatalogSearchScreen extends ConsumerStatefulWidget {
+  /// Creates a new [LegoCatalogSearchScreen].
+  const LegoCatalogSearchScreen({super.key});
 
   @override
-  ConsumerState<RebrickableSearchScreen> createState() =>
-      _RebrickableSearchScreenState();
+  ConsumerState<LegoCatalogSearchScreen> createState() =>
+      _LegoCatalogSearchScreenState();
 }
 
-class _RebrickableSearchScreenState
-    extends ConsumerState<RebrickableSearchScreen> {
+class _LegoCatalogSearchScreenState
+    extends ConsumerState<LegoCatalogSearchScreen> {
   bool _showErrorDetails = false;
 
   Future<void> _refreshSearchResults(WidgetRef ref) async {
@@ -230,7 +230,7 @@ class _RebrickableSearchScreenState
                   icon: Icons.toys_outlined,
                   title: 'Find your next build',
                   message:
-                      'Type a set number or name to search Rebrickable. '
+                      'Type a set number or name to search the catalog. '
                       'You can pull down anytime to refresh.',
                 );
               }
@@ -262,8 +262,9 @@ class _RebrickableSearchScreenState
                                 errorBuilder: (_, _, _) => const SizedBox(
                                   width: 56,
                                   height: 56,
-                                  child:
-                                      Icon(Icons.image_not_supported_outlined),
+                                  child: Icon(
+                                    Icons.image_not_supported_outlined,
+                                  ),
                                 ),
                               ),
                             )

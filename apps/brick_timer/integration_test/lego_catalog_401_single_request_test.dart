@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:brick_timer/services/Catalog_Service.dart';
 import 'package:brick_timer/state/search_providers.dart';
-import 'package:brick_timer/ui/search/rebrickable_search_screen.dart';
+import 'package:brick_timer/ui/search/lego_catalog_search_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,7 +36,7 @@ Widget _buildTestApp(CatalogService service) {
     overrides: [
       legoCatalogServiceProvider.overrideWithValue(service),
     ],
-    child: const MaterialApp(home: RebrickableSearchScreen()),
+    child: const MaterialApp(home: LegoCatalogSearchScreen()),
   );
 }
 

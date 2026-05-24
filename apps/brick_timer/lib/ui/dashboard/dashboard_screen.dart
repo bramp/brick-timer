@@ -1,6 +1,6 @@
 import 'package:brick_timer/state/dashboard_providers.dart';
 import 'package:brick_timer/ui/dashboard/sync_status_widget.dart';
-import 'package:brick_timer/ui/search/rebrickable_search_screen.dart';
+import 'package:brick_timer/ui/search/lego_catalog_search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -134,7 +134,7 @@ class DashboardScreen extends ConsumerWidget {
         onPressed: () async {
           await Navigator.of(context).push<void>(
             MaterialPageRoute<void>(
-              builder: (_) => const RebrickableSearchScreen(),
+              builder: (_) => const LegoCatalogSearchScreen(),
             ),
           );
         },
