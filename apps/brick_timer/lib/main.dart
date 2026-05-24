@@ -33,8 +33,13 @@ class BrickTimerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Brick Timer',
+      themeMode: ThemeMode.light,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        brightness: Brightness.light,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF65D1F5),
+        ),
+        scaffoldBackgroundColor: const Color(0xFF93E4FC),
         useMaterial3: true,
       ),
       home: const DashboardScreen(),
