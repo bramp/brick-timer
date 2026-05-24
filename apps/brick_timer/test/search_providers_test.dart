@@ -1,5 +1,5 @@
 import 'package:brick_timer/repositories/ledger_repository.dart';
-import 'package:brick_timer/services/Catalog_Service.dart';
+import 'package:brick_timer/services/catalog_service.dart';
 import 'package:brick_timer/state/search_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

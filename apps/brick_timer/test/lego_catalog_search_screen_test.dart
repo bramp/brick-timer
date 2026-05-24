@@ -1,5 +1,5 @@
 import 'package:brick_timer/repositories/ledger_repository.dart';
-import 'package:brick_timer/services/Catalog_Service.dart';
+import 'package:brick_timer/services/catalog_service.dart';
 import 'package:brick_timer/state/search_providers.dart';
 import 'package:brick_timer/ui/search/lego_catalog_search_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
