@@ -24,6 +24,12 @@ class FakeCatalogService implements CatalogService {
   Future<LegoSetsCompanion?> getSetDetails(String setNumber) async => null;
 
   @override
+  Future<void> refreshThemeCacheIfExpired() async {}
+
+  @override
+  Future<void> warmUp() async {}
+
+  @override
   Future<List<LegoSetsCompanion>> searchSets(
     String query, {
     int pageSize = 20,

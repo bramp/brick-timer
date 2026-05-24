@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Provider for the LEGO Catalog API service.
 final legoCatalogServiceProvider = Provider<CatalogService>((ref) {
   // TODO(bramp): Later swap this to FirebaseProxyService
-  return CatalogService.rebrickable(apiKey: Env.rebrickableApiKey);
+  return CatalogService.create(rebrickableApiKey: Env.rebrickableApiKey);
 });
 
 /// The current search query.

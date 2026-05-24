@@ -254,16 +254,15 @@ class _LegoCatalogSearchScreenState
                         horizontal: 12,
                         vertical: 6,
                       ),
-                      leading:
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: LegoSetThumbnail(
-                              imageUrl: setCompanion.imageUrl.present
-                                  ? setCompanion.imageUrl.value
-                                  : null,
-                              cacheManager: widget.imageCacheManager,
-                            ),
-                          ),
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: LegoSetThumbnail(
+                          imageUrl: setCompanion.imageUrl.present
+                              ? setCompanion.imageUrl.value
+                              : null,
+                          cacheManager: widget.imageCacheManager,
+                        ),
+                      ),
                       title: Text(
                         setCompanion.name.value,
                         maxLines: 2,
