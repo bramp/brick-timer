@@ -30,8 +30,23 @@ class CatalogService {
   }
 
   /// Searches for LEGO sets by text query.
-  Future<List<LegoSetsCompanion>> searchSets(String query) async {
-    final results = await _backend.searchSets(query);
+  ///
+  /// The default excluded theme root ID `501` is Rebrickable "Gear", which
+  /// mostly returns non-buildable items (storage, accessories, books, etc.).
+  Future<List<LegoSetsCompanion>> searchSets(
+    String query, {
+    int pageSize = 20,
+    int minParts = 1,
+    Set<int> excludedThemeRootIds = const {501},
+    bool includeDescendantThemesInExclusion = true,
+  }) async {
+    final results = await _backend.searchSets(
+      query,
+      pageSize: pageSize,
+      minParts: minParts,
+      excludedThemeRootIds: excludedThemeRootIds,
+      includeDescendantThemesInExclusion: includeDescendantThemesInExclusion,
+    );
     return results.map((set) {
       return LegoSetsCompanion.insert(
         setNumber: set.setNumber,

@@ -22,6 +22,9 @@ class _FakeBackend implements LegoCatalogBackend {
   Future<List<LegoSetSummary>> searchSets(
     String query, {
     int pageSize = 20,
+    int minParts = 1,
+    Set<int> excludedThemeRootIds = const {501},
+    bool includeDescendantThemesInExclusion = true,
   }) async {
     if (searchError != null) {
       throw searchError!;

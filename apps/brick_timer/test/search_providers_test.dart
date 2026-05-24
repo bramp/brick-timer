@@ -15,7 +15,13 @@ class MockCatalogService implements CatalogService {
   }
 
   @override
-  Future<List<LegoSetsCompanion>> searchSets(String query) async {
+  Future<List<LegoSetsCompanion>> searchSets(
+    String query, {
+    int pageSize = 20,
+    int minParts = 1,
+    Set<int> excludedThemeRootIds = const {501},
+    bool includeDescendantThemesInExclusion = true,
+  }) async {
     searchSetsCallCount++;
     queriedStrings.add(query);
     return [];
