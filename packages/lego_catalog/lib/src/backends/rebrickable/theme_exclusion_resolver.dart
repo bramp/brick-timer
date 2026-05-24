@@ -37,9 +37,11 @@ class RebrickableThemeExclusionResolver {
 
     final childThemeIdsByParent = <int?, List<int>>{};
     for (final theme in allThemes) {
-      childThemeIdsByParent.putIfAbsent(theme.parentId, () => <int>[]).add(
-        theme.id,
-      );
+      childThemeIdsByParent
+          .putIfAbsent(theme.parentId, () => <int>[])
+          .add(
+            theme.id,
+          );
     }
 
     final excluded = Set<int>.from(_rootThemeIds);
