@@ -83,28 +83,14 @@ The backend sheet relies on a micro-service script to process incoming payloads 
 
 ## 5. UI/UX Design Specifications
 
-### Screen 1: The Dashboard
+The visual design brief now lives in [UX_BRIEF.md](UX_BRIEF.md). Keep this document focused on the system, data model, and implementation plan.
 
-* A minimalistic entry portal showing current "In-Progress" builds, historic stats, and a dominant **Floating Action Button (+)** to start a new build.
-* A **Cloud Sync Status Widget** indicating if there are pending local items. If items are out of sync, it turns into an interactive button showing: `[ X Bags Pending Sync - Tap to Retry ]`.
+At a glance, the app should still follow these product-level UI constraints:
 
-### Screen 2: The Rebrickable Search Portal
-
-* A search text field with an aggressive 500ms debounce to prevent API thrashing.
-* A dynamic list displaying query match options containing thumbnail art, formal set titles, and total brick counts. Clicking an element instantiates the local DB session.
-* Future iteration: switch this screen to a paged/infinite-scroll model so locally filtered pages can continue loading when the backend still has more results.
-
-### Screen 3: The Active Build Workspace
-
-* A minimal layout designed to be read from a distance. Includes a prominent image of the set and a giant running stopwatch.
-* Primary Controls: Large, easy-to-hit action buttons changing status contextually based on the state machine (Start, Pause, Resume, Complete).
-
-### Material Design Requirements
-
-* Follow Material Design 3 best practices across all Flutter UI screens and components.
-* Prefer built-in Material widgets (for example: `Scaffold`, `AppBar`, `Card`, `ListTile`, `FilledButton`, `SnackBar`) before custom alternatives.
-* Use Material color roles, typography, shape, spacing, and elevation consistently to keep the app accessible and visually coherent.
-* Use clear empty/loading/error states with actionable recovery patterns (for example: pull-to-refresh and retry buttons) instead of raw exception text.
+* Large tap targets and high-contrast text for dusty-hands use.
+* Fast, low-friction flows that keep search, start, pause, and complete actions within one or two taps.
+* Clear loading, empty, offline, and error states with a recovery action on every important screen.
+* Material Design 3 as the baseline component and motion system.
 
 ### Testing Requirements
 
