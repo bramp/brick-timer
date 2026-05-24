@@ -6,9 +6,6 @@ flutter_native_splash:
     icon_background_color: "#93e4fc"
   android: true
   ios: true
-  web: false
-
-
-# TODO Enable web
+  web: true
 # TODO Add branding and other features
 # TODO Ensure dark mode works
