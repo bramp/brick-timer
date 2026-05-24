@@ -49,7 +49,10 @@ class ActiveBuildCard extends ConsumerWidget {
         canControl &&
         currentBag != null &&
         (status == TimerStatus.running || status == TimerStatus.paused);
-    final canFinishBag = canControl && currentBag != null;
+    final canFinishBag =
+        canControl &&
+        currentBag != null &&
+        (status == TimerStatus.running || status == TimerStatus.paused);
     final canStartNextBag = canControl;
     final hasStartedBagFuture =
         (ledgerRepository.select(ledgerRepository.bagIntervals)
@@ -446,11 +449,18 @@ class _BagDetailsSheet extends StatelessWidget {
                         final interval = rows[index];
                         final end = interval.endTime;
                         final duration = end?.difference(interval.startTime);
+                        final sameDay =
+                            end != null &&
+                            interval.startTime.year == end.year &&
+                            interval.startTime.month == end.month &&
+                            interval.startTime.day == end.day;
                         final startText = DateFormat.yMd().add_jm().format(
                           interval.startTime,
                         );
                         final endText = end == null
                             ? 'In progress'
+                            : sameDay
+                            ? DateFormat.jm().format(end)
                             : DateFormat.yMd().add_jm().format(end);
                         final rangeText = '$startText to $endText';
 
@@ -504,11 +514,27 @@ class _StatusPill extends StatelessWidget {
 }
 
 String _formatDuration(Duration duration) {
-  String twoDigits(int value) => value.toString().padLeft(2, '0');
+  final hours = duration.inHours;
+  final minutes = duration.inMinutes.remainder(60);
+  final seconds = duration.inSeconds.remainder(60);
 
-  final hours = twoDigits(duration.inHours);
-  final minutes = twoDigits(duration.inMinutes.remainder(60));
-  final seconds = twoDigits(duration.inSeconds.remainder(60));
+  final parts = <String>[];
+  if (hours > 0) {
+    parts.add('$hours ${hours == 1 ? 'hour' : 'hours'}');
+  }
+  if (minutes > 0) {
+    parts.add('$minutes ${minutes == 1 ? 'minute' : 'minutes'}');
+  }
+  if (seconds > 0 || parts.isEmpty) {
+    parts.add('$seconds ${seconds == 1 ? 'second' : 'seconds'}');
+  }
 
-  return '$hours:$minutes:$seconds';
+  if (parts.length == 1) {
+    return parts.first;
+  }
+  if (parts.length == 2) {
+    return '${parts[0]} and ${parts[1]}';
+  }
+
+  return '${parts[0]}, ${parts[1]}, and ${parts[2]}';
 }

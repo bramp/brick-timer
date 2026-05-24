@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:brick_timer/services/rebrickable_theme_cache_service.dart';
+import 'package:clock/clock.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -139,7 +140,7 @@ void main() {
         throw Exception('network down');
       },
       cacheManager: cacheManager,
-      now: () => now,
+      clock: Clock.fixed(now),
     );
 
     final expanded = await service.expandThemeRootIds({1});

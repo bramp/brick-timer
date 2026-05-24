@@ -37,3 +37,4 @@
 - [ ] Add simple line/bar visual charts for tracking bricks-per-minute trends.
 - [ ] Wire the GitHub Pages build metadata (`COMMIT_HASH` and `BUILD_DATE`) into the app UI, using a small `BuildInfo` helper backed by `String.fromEnvironment`, similar to https://github.com/bramp/grids `apps/grids/lib/build_info.dart`.
 - [ ] Pull down to refresh
+- [ ] Make all text copied and pastable.

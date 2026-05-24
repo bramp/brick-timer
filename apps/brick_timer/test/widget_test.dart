@@ -28,6 +28,6 @@ void main() {
 
     // Verify that our app shows the dashboard title instead of basic text.
     expect(find.text('Brick Timer'), findsOneWidget);
-    expect(find.text('Start build'), findsOneWidget);
+    expect(find.text('Start New Build'), findsOneWidget);
   });
 }
