@@ -2,6 +2,8 @@ import 'package:brick_timer/repositories/ledger_repository.dart';
 import 'package:brick_timer/services/Catalog_Service.dart';
 import 'package:brick_timer/state/search_providers.dart';
 import 'package:brick_timer/ui/search/lego_catalog_search_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,7 +42,9 @@ Widget _buildTestApp(CatalogService catalogService) {
     overrides: [
       legoCatalogServiceProvider.overrideWithValue(catalogService),
     ],
-    child: const MaterialApp(home: LegoCatalogSearchScreen()),
+    child: const MaterialApp(
+      home: LegoCatalogSearchScreen(),
+    ),
   );
 }
 
@@ -75,6 +79,35 @@ void main() {
 
     expect(find.text('Lamborghini Sian FKP 37'), findsOneWidget);
     expect(service.queries, ['Lamborghini']);
+  });
+
+  testWidgets('renders cached network image for result with image url', (
+    tester,
+  ) async {
+    final service = FakeCatalogService(
+      results: [
+        LegoSetsCompanion.insert(
+          setNumber: '42115-1',
+          name: 'Lamborghini Sian FKP 37',
+          totalPieces: 3696,
+          imageUrl: const Value('https://example.com/42115.png'),
+        ),
+      ],
+    );
+    await tester.pumpWidget(_buildTestApp(service));
+
+    await tester.enterText(find.byType(TextField), 'Lamborghini');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump();
+
+    expect(find.text('Lamborghini Sian FKP 37'), findsOneWidget);
+    expect(find.byType(CachedNetworkImage), findsOneWidget);
+
+    final image = tester.widget<CachedNetworkImage>(
+      find.byType(CachedNetworkImage),
+    );
+    expect(image.imageUrl, 'https://example.com/42115.png');
   });
 
   testWidgets('shows no sets found for empty result', (tester) async {

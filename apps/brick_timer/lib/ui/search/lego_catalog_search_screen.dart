@@ -1,15 +1,20 @@
 import 'package:brick_timer/main.dart'; // for ledgerRepository
 import 'package:brick_timer/state/active_session_notifier.dart';
 import 'package:brick_timer/state/search_providers.dart';
+import 'package:brick_timer/ui/search/lego_set_thumbnail.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lego_catalog/lego_catalog.dart';
 
 /// Screen for searching and adding new LEGO sets from the catalog backend.
 class LegoCatalogSearchScreen extends ConsumerStatefulWidget {
   /// Creates a new [LegoCatalogSearchScreen].
-  const LegoCatalogSearchScreen({super.key});
+  const LegoCatalogSearchScreen({this.imageCacheManager, super.key});
+
+  /// Optional cache manager override used by tests.
+  final BaseCacheManager? imageCacheManager;
 
   @override
   ConsumerState<LegoCatalogSearchScreen> createState() =>
@@ -250,29 +255,15 @@ class _LegoCatalogSearchScreenState
                         vertical: 6,
                       ),
                       leading:
-                          setCompanion.imageUrl.present &&
-                              setCompanion.imageUrl.value != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                setCompanion.imageUrl.value!,
-                                width: 56,
-                                height: 56,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => const SizedBox(
-                                  width: 56,
-                                  height: 56,
-                                  child: Icon(
-                                    Icons.image_not_supported_outlined,
-                                  ),
-                                ),
-                              ),
-                            )
-                          : const SizedBox(
-                              width: 56,
-                              height: 56,
-                              child: Icon(Icons.category_outlined),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: LegoSetThumbnail(
+                              imageUrl: setCompanion.imageUrl.present
+                                  ? setCompanion.imageUrl.value
+                                  : null,
+                              cacheManager: widget.imageCacheManager,
                             ),
+                          ),
                       title: Text(
                         setCompanion.name.value,
                         maxLines: 2,
