@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:clock/clock.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:lego_catalog/lego_catalog.dart';
 import 'package:logger/logger.dart';
@@ -12,11 +13,11 @@ class RebrickableThemeCacheService {
     required Future<List<LegoTheme>> Function() fetchThemes,
     BaseCacheManager? cacheManager,
     Duration ttl = const Duration(days: 7),
-    DateTime Function()? now,
+    Clock? clock,
   }) : _fetchThemes = fetchThemes,
        _cacheManager = cacheManager ?? _RebrickableThemeCacheManager.instance,
        _ttl = ttl,
-       _now = now ?? DateTime.now;
+       _clock = clock ?? const Clock();
 
   static const String _themesCacheObjectKey = 'rebrickable_theme_cache_v1';
   static final Logger _logger = Logger(level: Level.warning);
@@ -24,7 +25,7 @@ class RebrickableThemeCacheService {
   final Future<List<LegoTheme>> Function() _fetchThemes;
   final BaseCacheManager _cacheManager;
   final Duration _ttl;
-  final DateTime Function() _now;
+  final Clock _clock;
 
   Future<List<LegoTheme>>? _themesFuture;
 
@@ -89,7 +90,7 @@ class RebrickableThemeCacheService {
     try {
       final fetchedThemes = await _fetchThemes();
       final payload = _ThemeCachePayload(
-        fetchedAt: _now().toUtc(),
+        fetchedAt: _clock.now().toUtc(),
         themes: fetchedThemes,
       );
 
@@ -119,7 +120,7 @@ class RebrickableThemeCacheService {
   }
 
   bool _isExpired(DateTime fetchedAt) {
-    final age = _now().toUtc().difference(fetchedAt.toUtc());
+    final age = _clock.now().toUtc().difference(fetchedAt.toUtc());
     return age >= _ttl;
   }
 

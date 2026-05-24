@@ -22,6 +22,9 @@ class LedgerRepository extends _$LedgerRepository {
   /// Creates a repository backed by the platform-specific drift connection.
   LedgerRepository() : super(openLedgerConnection());
 
+  /// Creates a repository backed by a custom drift [executor].
+  LedgerRepository.forExecutor(super.e);
+
   @override
   /// Current database schema version.
   int get schemaVersion => 1;

@@ -4,6 +4,7 @@ import 'package:brick_timer/main.dart'; // for ledgerRepository
 import 'package:brick_timer/repositories/ledger_repository.dart';
 import 'package:brick_timer/services/spreadsheet_service.dart';
 import 'package:brick_timer/services/sync_orchestrator.dart';
+import 'package:clock/clock.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -36,7 +37,8 @@ class ActiveSessionState {
     this.status = TimerStatus.stopped,
     this.elapsed = Duration.zero,
     this.currentIntervalStart,
-  });
+    Clock? clock,
+  }) : _clock = clock ?? const Clock();
 
   /// The active build session.
   final BuildSession? session;
@@ -53,10 +55,12 @@ class ActiveSessionState {
   /// The start time of the current running interval, if any.
   final DateTime? currentIntervalStart;
 
+  final Clock _clock;
+
   /// Returns the total duration including the currently running interval.
   Duration get totalElapsed {
     if (status == TimerStatus.running && currentIntervalStart != null) {
-      return elapsed + DateTime.now().difference(currentIntervalStart!);
+      return elapsed + _clock.now().difference(currentIntervalStart!);
     }
     return elapsed;
   }
@@ -68,6 +72,7 @@ class ActiveSessionState {
     TimerStatus? status,
     Duration? elapsed,
     DateTime? currentIntervalStart,
+    Clock? clock,
   }) {
     return ActiveSessionState(
       session: session ?? this.session,
@@ -75,13 +80,26 @@ class ActiveSessionState {
       status: status ?? this.status,
       elapsed: elapsed ?? this.elapsed,
       currentIntervalStart: currentIntervalStart ?? this.currentIntervalStart,
+      clock: clock ?? _clock,
     );
   }
 }
 
 /// Notifier that manages the state of the active LEGO build session.
 class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
+  /// Creates an [ActiveSessionNotifier].
+  ActiveSessionNotifier({
+    LedgerRepository? repository,
+    Clock? clock,
+    Future<void> Function()? syncPendingBags,
+  }) : _repository = repository ?? ledgerRepository,
+       _clock = clock ?? const Clock(),
+       _syncPendingBags = syncPendingBags ?? syncOrchestrator.syncPendingBags;
+
   Timer? _ticker;
+  final LedgerRepository _repository;
+  final Clock _clock;
+  final Future<void> Function() _syncPendingBags;
 
   @override
   ActiveSessionState build() {
@@ -97,12 +115,12 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
 
     unawaited(_loadInitialState());
 
-    return ActiveSessionState();
+    return ActiveSessionState(clock: _clock);
   }
 
   Future<void> _loadInitialState() async {
     final activeSession =
-        await (ledgerRepository.select(ledgerRepository.buildSessions)
+        await (_repository.select(_repository.buildSessions)
               ..where((t) => t.isCompleted.equals(false))
               ..orderBy([
                 (t) => OrderingTerm(
@@ -113,14 +131,16 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
               ..limit(1))
             .getSingleOrNull();
 
-    if (activeSession == null) return;
+    if (activeSession == null) {
+      return;
+    }
 
     await _hydrateSession(activeSession);
   }
 
   Future<void> _hydrateSession(BuildSession session) async {
     final latestInterval =
-        await (ledgerRepository.select(ledgerRepository.bagIntervals)
+        await (_repository.select(_repository.bagIntervals)
               ..where((t) => t.buildSessionId.equals(session.id))
               ..orderBy([
                 (t) => OrderingTerm(
@@ -133,13 +153,13 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
     if (latestInterval == null) {
       state = ActiveSessionState(
         session: session,
+        clock: _clock,
       );
-
       return;
     }
 
     final endedIntervals =
-        await (ledgerRepository.select(ledgerRepository.bagIntervals)
+        await (_repository.select(_repository.bagIntervals)
               ..where((t) => t.buildSessionId.equals(session.id))
               ..where((t) => t.endTime.isNotNull()))
             .get();
@@ -162,6 +182,7 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
       status: status,
       elapsed: totalElapsed,
       currentIntervalStart: isRunning ? latestInterval.startTime : null,
+      clock: _clock,
     );
   }
 
@@ -171,7 +192,7 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
       return;
     }
 
-    final session = await ledgerRepository.getSession(sessionId);
+    final session = await _repository.getSession(sessionId);
     if (session == null || session.isCompleted) {
       return;
     }
@@ -182,11 +203,40 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
   /// Starts or resumes tracking for a bag.
   Future<void> startOrResumeBag(int bagNumber) async {
     final session = state.session;
-    if (session == null) return;
+    if (session == null) {
+      return;
+    }
 
-    final now = DateTime.now();
-    await ledgerRepository
-        .into(ledgerRepository.bagIntervals)
+    final now = _clock.now();
+
+    final runningInterval =
+        await (_repository.select(_repository.bagIntervals)
+              ..where((t) => t.buildSessionId.equals(session.id))
+              ..where((t) => t.endTime.isNull())
+              ..orderBy([
+                (t) => OrderingTerm(
+                  expression: t.startTime,
+                  mode: OrderingMode.desc,
+                ),
+              ])
+              ..limit(1))
+            .getSingleOrNull();
+
+    if (runningInterval != null) {
+      if (runningInterval.bagNumber == bagNumber) {
+        return;
+      }
+
+      await (_repository.update(_repository.bagIntervals)
+            ..where((t) => t.id.equals(runningInterval.id)))
+          .write(BagIntervalsCompanion(endTime: Value(now)));
+
+      final intervalDuration = now.difference(runningInterval.startTime);
+      state = state.copyWith(elapsed: state.elapsed + intervalDuration);
+    }
+
+    await _repository
+        .into(_repository.bagIntervals)
         .insert(
           BagIntervalsCompanion.insert(
             buildSessionId: session.id,
@@ -204,12 +254,14 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
 
   /// Pauses the current tracking.
   Future<void> pause() async {
-    if (state.status != TimerStatus.running || state.currentBag == null) return;
+    if (state.status != TimerStatus.running || state.currentBag == null) {
+      return;
+    }
 
-    final now = DateTime.now();
+    final now = _clock.now();
 
     final runningInterval =
-        await (ledgerRepository.select(ledgerRepository.bagIntervals)
+        await (_repository.select(_repository.bagIntervals)
               ..where((t) => t.buildSessionId.equals(state.session!.id))
               ..where((t) => t.bagNumber.equals(state.currentBag!))
               ..where((t) => t.endTime.isNull())
@@ -217,7 +269,7 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
             .getSingleOrNull();
 
     if (runningInterval != null) {
-      await (ledgerRepository.update(ledgerRepository.bagIntervals)
+      await (_repository.update(_repository.bagIntervals)
             ..where((t) => t.id.equals(runningInterval.id)))
           .write(BagIntervalsCompanion(endTime: Value(now)));
 
@@ -232,13 +284,15 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
 
   /// Completes the current bag.
   Future<void> completeBag() async {
-    if (state.currentBag == null || state.session == null) return;
+    if (state.currentBag == null || state.session == null) {
+      return;
+    }
 
-    final now = DateTime.now();
+    final now = _clock.now();
 
-    await ledgerRepository.transaction(() async {
+    await _repository.transaction(() async {
       final runningInterval =
-          await (ledgerRepository.select(ledgerRepository.bagIntervals)
+          await (_repository.select(_repository.bagIntervals)
                 ..where((t) => t.buildSessionId.equals(state.session!.id))
                 ..where((t) => t.bagNumber.equals(state.currentBag!))
                 ..where((t) => t.endTime.isNull())
@@ -246,8 +300,8 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
               .getSingleOrNull();
 
       if (runningInterval != null) {
-        await (ledgerRepository.update(
-          ledgerRepository.bagIntervals,
+        await (_repository.update(
+          _repository.bagIntervals,
         )..where((t) => t.id.equals(runningInterval.id))).write(
           BagIntervalsCompanion(
             endTime: Value(now),
@@ -256,7 +310,7 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
         );
       } else {
         final lastInterval =
-            await (ledgerRepository.select(ledgerRepository.bagIntervals)
+            await (_repository.select(_repository.bagIntervals)
                   ..where((t) => t.buildSessionId.equals(state.session!.id))
                   ..where((t) => t.bagNumber.equals(state.currentBag!))
                   ..orderBy([
@@ -268,7 +322,7 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
                 .getSingleOrNull();
 
         if (lastInterval != null) {
-          await (ledgerRepository.update(ledgerRepository.bagIntervals)
+          await (_repository.update(_repository.bagIntervals)
                 ..where((t) => t.id.equals(lastInterval.id)))
               .write(const BagIntervalsCompanion(isCompleted: Value(true)));
         }
@@ -279,19 +333,21 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
       status: TimerStatus.stopped,
     );
 
-    syncOrchestrator.syncPendingBags().ignore();
+    _syncPendingBags().ignore();
   }
 
   /// Marks the active build session complete.
   Future<void> finishSet() async {
     final session = state.session;
-    if (session == null) return;
+    if (session == null) {
+      return;
+    }
 
-    final now = DateTime.now();
+    final now = _clock.now();
 
-    await ledgerRepository.transaction(() async {
+    await _repository.transaction(() async {
       final runningInterval =
-          await (ledgerRepository.select(ledgerRepository.bagIntervals)
+          await (_repository.select(_repository.bagIntervals)
                 ..where((t) => t.buildSessionId.equals(session.id))
                 ..where((t) => t.endTime.isNull())
                 ..orderBy([
@@ -303,8 +359,8 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
               .getSingleOrNull();
 
       if (runningInterval != null) {
-        await (ledgerRepository.update(
-          ledgerRepository.bagIntervals,
+        await (_repository.update(
+          _repository.bagIntervals,
         )..where((t) => t.id.equals(runningInterval.id))).write(
           BagIntervalsCompanion(
             endTime: Value(now),
@@ -316,23 +372,23 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
         state = state.copyWith(elapsed: state.elapsed + intervalDuration);
       }
 
-      await (ledgerRepository.update(
-        ledgerRepository.buildSessions,
+      await (_repository.update(
+        _repository.buildSessions,
       )..where((t) => t.id.equals(session.id))).write(
         const BuildSessionsCompanion(isCompleted: Value(true)),
       );
     });
 
-    state = ActiveSessionState();
-    syncOrchestrator.syncPendingBags().ignore();
+    state = ActiveSessionState(clock: _clock);
+    _syncPendingBags().ignore();
   }
 
   /// Starts a completely new build session for a set.
   Future<void> startNewSession(LegoSet legoSet) async {
-    final now = DateTime.now();
+    final now = _clock.now();
 
-    final sessionId = await ledgerRepository
-        .into(ledgerRepository.buildSessions)
+    final sessionId = await _repository
+        .into(_repository.buildSessions)
         .insert(
           BuildSessionsCompanion.insert(
             legoSetId: legoSet.id,
@@ -348,7 +404,7 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
       isCompleted: false,
     );
 
-    state = ActiveSessionState(session: session);
+    state = ActiveSessionState(session: session, clock: _clock);
   }
 }
 
