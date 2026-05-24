@@ -47,7 +47,7 @@ class ActiveSessionState {
   /// The current status of the timer.
   final TimerStatus status;
 
-  /// The aggregated duration of completed intervals for the current bag.
+  /// The aggregated duration of all completed intervals in this session.
   final Duration elapsed;
 
   /// The start time of the current running interval, if any.
@@ -115,46 +115,68 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
 
     if (activeSession == null) return;
 
+    await _hydrateSession(activeSession);
+  }
+
+  Future<void> _hydrateSession(BuildSession session) async {
     final latestInterval =
         await (ledgerRepository.select(ledgerRepository.bagIntervals)
-              ..where((t) => t.buildSessionId.equals(activeSession.id))
+              ..where((t) => t.buildSessionId.equals(session.id))
               ..orderBy([
                 (t) => OrderingTerm(
                   expression: t.startTime,
-                  mode: OrderingMode.desc,
                 ),
               ])
               ..limit(1))
             .getSingleOrNull();
 
-    if (latestInterval != null) {
-      final isRunning = latestInterval.endTime == null;
-
-      final previousIntervals =
-          await (ledgerRepository.select(ledgerRepository.bagIntervals)
-                ..where((t) => t.buildSessionId.equals(activeSession.id))
-                ..where((t) => t.bagNumber.equals(latestInterval.bagNumber))
-                ..where((t) => t.endTime.isNotNull()))
-              .get();
-
-      var totalElapsed = Duration.zero;
-      for (final interval in previousIntervals) {
-        totalElapsed += interval.endTime!.difference(interval.startTime);
-      }
-
-      state = state.copyWith(
-        session: activeSession,
-        currentBag: latestInterval.bagNumber,
-        status: isRunning ? TimerStatus.running : TimerStatus.paused,
-        elapsed: totalElapsed,
-        currentIntervalStart: isRunning ? latestInterval.startTime : null,
+    if (latestInterval == null) {
+      state = ActiveSessionState(
+        session: session,
       );
-    } else {
-      state = state.copyWith(
-        session: activeSession,
-        status: TimerStatus.stopped,
-      );
+
+      return;
     }
+
+    final endedIntervals =
+        await (ledgerRepository.select(ledgerRepository.bagIntervals)
+              ..where((t) => t.buildSessionId.equals(session.id))
+              ..where((t) => t.endTime.isNotNull()))
+            .get();
+
+    var totalElapsed = Duration.zero;
+    for (final interval in endedIntervals) {
+      totalElapsed += interval.endTime!.difference(interval.startTime);
+    }
+
+    final isRunning = latestInterval.endTime == null;
+    final status = isRunning
+        ? TimerStatus.running
+        : latestInterval.isCompleted
+        ? TimerStatus.stopped
+        : TimerStatus.paused;
+
+    state = ActiveSessionState(
+      session: session,
+      currentBag: latestInterval.bagNumber,
+      status: status,
+      elapsed: totalElapsed,
+      currentIntervalStart: isRunning ? latestInterval.startTime : null,
+    );
+  }
+
+  /// Activates the given session for timer controls.
+  Future<void> activateSession(int sessionId) async {
+    if (state.session?.id == sessionId) {
+      return;
+    }
+
+    final session = await ledgerRepository.getSession(sessionId);
+    if (session == null || session.isCompleted) {
+      return;
+    }
+
+    await _hydrateSession(session);
   }
 
   /// Starts or resumes tracking for a bag.
@@ -173,13 +195,10 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
           ),
         );
 
-    final isNewBag = state.currentBag != bagNumber;
-
     state = state.copyWith(
       currentBag: bagNumber,
       status: TimerStatus.running,
       currentIntervalStart: now,
-      elapsed: isNewBag ? Duration.zero : state.elapsed,
     );
   }
 
@@ -243,7 +262,6 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
                   ..orderBy([
                     (t) => OrderingTerm(
                       expression: t.endTime,
-                      mode: OrderingMode.desc,
                     ),
                   ])
                   ..limit(1))
@@ -259,9 +277,53 @@ class ActiveSessionNotifier extends Notifier<ActiveSessionState> {
 
     state = state.copyWith(
       status: TimerStatus.stopped,
-      elapsed: Duration.zero,
     );
 
+    syncOrchestrator.syncPendingBags().ignore();
+  }
+
+  /// Marks the active build session complete.
+  Future<void> finishSet() async {
+    final session = state.session;
+    if (session == null) return;
+
+    final now = DateTime.now();
+
+    await ledgerRepository.transaction(() async {
+      final runningInterval =
+          await (ledgerRepository.select(ledgerRepository.bagIntervals)
+                ..where((t) => t.buildSessionId.equals(session.id))
+                ..where((t) => t.endTime.isNull())
+                ..orderBy([
+                  (t) => OrderingTerm(
+                    expression: t.startTime,
+                  ),
+                ])
+                ..limit(1))
+              .getSingleOrNull();
+
+      if (runningInterval != null) {
+        await (ledgerRepository.update(
+          ledgerRepository.bagIntervals,
+        )..where((t) => t.id.equals(runningInterval.id))).write(
+          BagIntervalsCompanion(
+            endTime: Value(now),
+            isCompleted: const Value(true),
+          ),
+        );
+
+        final intervalDuration = now.difference(runningInterval.startTime);
+        state = state.copyWith(elapsed: state.elapsed + intervalDuration);
+      }
+
+      await (ledgerRepository.update(
+        ledgerRepository.buildSessions,
+      )..where((t) => t.id.equals(session.id))).write(
+        const BuildSessionsCompanion(isCompleted: Value(true)),
+      );
+    });
+
+    state = ActiveSessionState();
     syncOrchestrator.syncPendingBags().ignore();
   }
 
