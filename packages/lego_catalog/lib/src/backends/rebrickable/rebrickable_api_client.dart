@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:dio_smart_retry/dio_smart_retry.dart';
 
+import 'package:lego_catalog/src/backends/rebrickable/lego_theme.dart';
 import 'package:lego_catalog/src/errors/catalog_http_exception.dart';
 
 /// Thin API client for Rebrickable HTTP interactions.
@@ -104,8 +105,8 @@ class RebrickableApiClient {
   }
 
   /// Lists all themes by paging through the API.
-  Future<List<Map<String, dynamic>>> listThemesRaw() async {
-    final allThemes = <Map<String, dynamic>>[];
+  Future<List<LegoTheme>> listThemes() async {
+    final allThemes = <LegoTheme>[];
     var page = 1;
 
     while (true) {
@@ -134,7 +135,11 @@ class RebrickableApiClient {
         return allThemes;
       }
 
-      allThemes.addAll(results.whereType<Map<String, dynamic>>());
+      for (final item in results.whereType<Map<String, dynamic>>()) {
+        allThemes.add(
+          LegoTheme.fromJson(item.cast<String, Object?>()),
+        );
+      }
 
       final next = data['next'];
       if (next == null || (next is String && next.isEmpty)) {

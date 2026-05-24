@@ -7,3 +7,8 @@ flutter_native_splash:
   android: true
   ios: true
   web: false
+
+
+# TODO Enable web
+# TODO Add branding and other features
+# TODO Ensure dark mode works

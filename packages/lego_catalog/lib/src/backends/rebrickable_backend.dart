@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import 'package:lego_catalog/src/backends/lego_catalog_backend.dart';
+import 'package:lego_catalog/src/backends/rebrickable/lego_theme.dart';
 import 'package:lego_catalog/src/backends/rebrickable/rebrickable_api_client.dart';
 import 'package:lego_catalog/src/backends/rebrickable/search_filter_policy.dart';
 import 'package:lego_catalog/src/backends/rebrickable/theme_exclusion_resolver.dart';
@@ -32,8 +33,6 @@ class RebrickableBackend implements LegoCatalogBackend {
   static const String _defaultBaseUrl = RebrickableApiClient.defaultBaseUrl;
 
   final RebrickableApiClient _apiClient;
-  final Map<String, RebrickableThemeExclusionResolver>
-  _themeExclusionResolvers = <String, RebrickableThemeExclusionResolver>{};
 
   @override
   Future<List<LegoSetSummary>> searchSets(
@@ -60,18 +59,10 @@ class RebrickableBackend implements LegoCatalogBackend {
         pageSize: pageSize,
       ),
     );
-    final resolverKey = _themeExclusionCacheKey(
+    final themeExclusionResolver = RebrickableThemeExclusionResolver(
+      apiClient: _apiClient,
       rootThemeIds: filterPolicy.excludedThemeRootIds,
       includeDescendantThemes: filterPolicy.includeDescendantThemesInExclusion,
-    );
-    final themeExclusionResolver = _themeExclusionResolvers.putIfAbsent(
-      resolverKey,
-      () => RebrickableThemeExclusionResolver(
-        apiClient: _apiClient,
-        rootThemeIds: filterPolicy.excludedThemeRootIds,
-        includeDescendantThemes:
-            filterPolicy.includeDescendantThemesInExclusion,
-      ),
     );
     final excludedThemeIds = await themeExclusionResolver.getExcludedThemeIds();
 
@@ -90,16 +81,13 @@ class RebrickableBackend implements LegoCatalogBackend {
     return LegoSetDetails.fromJson(data);
   }
 
+  /// Lists Rebrickable themes for app-layer caching and expansion.
+  Future<List<LegoTheme>> listThemes() {
+    return _apiClient.listThemes();
+  }
+
   /// Disposes owned HTTP resources when this backend created the Dio client.
   void dispose() {
     _apiClient.dispose();
   }
-}
-
-String _themeExclusionCacheKey({
-  required Set<int> rootThemeIds,
-  required bool includeDescendantThemes,
-}) {
-  final sortedIds = rootThemeIds.toList()..sort();
-  return '${includeDescendantThemes ? '1' : '0'}:${sortedIds.join(',')}';
 }

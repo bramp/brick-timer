@@ -1,4 +1,6 @@
+import 'package:brick_timer/env/env.dart';
 import 'package:brick_timer/repositories/ledger_repository.dart';
+import 'package:brick_timer/services/catalog_service.dart';
 import 'package:brick_timer/ui/dashboard/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,9 +12,14 @@ final ledgerRepository = LedgerRepository();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // TODOlet's add a splash screen
+  // TODO(bramp): Let's add a splash screen
 
   await ledgerRepository.init();
+
+  final catalogService = CatalogService.create(
+    rebrickableApiKey: Env.rebrickableApiKey,
+  );
+  await catalogService.warmUp();
 
   runApp(const ProviderScope(child: BrickTimerApp()));
 }

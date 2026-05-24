@@ -15,6 +15,12 @@ class MockCatalogService implements CatalogService {
   }
 
   @override
+  Future<void> refreshThemeCacheIfExpired() async {}
+
+  @override
+  Future<void> warmUp() async {}
+
+  @override
   Future<List<LegoSetsCompanion>> searchSets(
     String query, {
     int pageSize = 20,

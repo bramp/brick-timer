@@ -1,3 +1,4 @@
+import 'package:lego_catalog/src/backends/rebrickable/lego_theme.dart';
 import 'package:lego_catalog/src/backends/rebrickable/rebrickable_api_client.dart';
 
 /// Resolves excluded theme IDs, optionally including descendants.
@@ -15,15 +16,13 @@ class RebrickableThemeExclusionResolver {
   final Set<int> _rootThemeIds;
   final bool _includeDescendantThemes;
 
-  Future<Set<int>>? _excludedThemeIdsFuture;
-
-  /// Returns the excluded theme IDs, using a cached value after first lookup.
+  /// Returns the excluded theme IDs.
   Future<Set<int>> getExcludedThemeIds() {
     if (_rootThemeIds.isEmpty) {
       return Future<Set<int>>.value(const <int>{});
     }
 
-    return _excludedThemeIdsFuture ??= _fetchExcludedThemeIds();
+    return _fetchExcludedThemeIds();
   }
 
   Future<Set<int>> _fetchExcludedThemeIds() async {
@@ -38,13 +37,9 @@ class RebrickableThemeExclusionResolver {
 
     final childThemeIdsByParent = <int?, List<int>>{};
     for (final theme in allThemes) {
-      final id = (theme['id'] as num?)?.toInt();
-      if (id == null) {
-        continue;
-      }
-
-      final parentId = (theme['parent_id'] as num?)?.toInt();
-      childThemeIdsByParent.putIfAbsent(parentId, () => <int>[]).add(id);
+      childThemeIdsByParent.putIfAbsent(theme.parentId, () => <int>[]).add(
+        theme.id,
+      );
     }
 
     final excluded = Set<int>.from(_rootThemeIds);
@@ -66,12 +61,12 @@ class RebrickableThemeExclusionResolver {
     return excluded;
   }
 
-  Future<List<Map<String, dynamic>>> _safeListThemes() async {
+  Future<List<LegoTheme>> _safeListThemes() async {
     try {
-      return await _apiClient.listThemesRaw();
+      return await _apiClient.listThemes();
     } on Exception {
       // If theme lookup fails, continue with configured roots only.
-      return const <Map<String, dynamic>>[];
+      return const <LegoTheme>[];
     }
   }
 }
