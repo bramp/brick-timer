@@ -1,4 +1,4 @@
-import 'package:brick_timer/services/Catalog_Service.dart';
+import 'package:brick_timer/services/catalog_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lego_catalog/lego_catalog.dart';
 

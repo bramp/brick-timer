@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:brick_timer/env/env.dart';
 import 'package:brick_timer/repositories/ledger_repository.dart';
-import 'package:brick_timer/services/Catalog_Service.dart';
+import 'package:brick_timer/services/catalog_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Provider for the LEGO Catalog API service.
