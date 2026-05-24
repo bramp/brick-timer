@@ -31,6 +31,7 @@ class RebrickableSearchFilterPolicy {
   }) {
     return {
       'search': query,
+      'ordering': '-year',
       'page_size': pageSize.toString(),
       if (minParts > 0) 'min_parts': minParts.toString(),
     };

@@ -31,6 +31,7 @@ void main() {
       final adapter = _MockAdapter((request) async {
         expect(request.path, '/sets/');
         expect(request.queryParameters['search'], 'Lamborghini');
+        expect(request.queryParameters['ordering'], '-year');
         expect(request.queryParameters['min_parts'], '1');
         expect(request.headers['Authorization'], 'key TEST_KEY');
 
