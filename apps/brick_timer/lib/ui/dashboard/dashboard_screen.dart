@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:brick_timer/state/active_session_notifier.dart';
 import 'package:brick_timer/state/dashboard_providers.dart';
 import 'package:brick_timer/state/dashboard_view_model_provider.dart';
@@ -11,8 +13,11 @@ import 'package:brick_timer/ui/dashboard/widgets/dashboard_sync_status_action.da
 import 'package:brick_timer/ui/dashboard/widgets/recent_build_card.dart';
 import 'package:brick_timer/ui/dashboard/widgets/recent_build_empty_state.dart';
 import 'package:brick_timer/ui/search/lego_catalog_search_screen.dart';
+import 'package:brick_timer/ui/settings/legal_notices_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+enum _DashboardMenuAction { about }
 
 /// The main dashboard screen displaying in-progress builds and recent sessions.
 class DashboardScreen extends ConsumerWidget {
@@ -42,6 +47,13 @@ class DashboardScreen extends ConsumerWidget {
                   label: 'Completed',
                   value: viewModel.completedCount.toString(),
                 ),
+                const SizedBox(width: 6),
+                DashboardSyncStatusAction(
+                  countAsync: syncCountAsync,
+                  onRetry: () async {
+                    await syncOrchestrator.syncPendingBags();
+                  },
+                ),
               ],
             );
           },
@@ -49,11 +61,27 @@ class DashboardScreen extends ConsumerWidget {
         ),
         centerTitle: false,
         actions: [
-          DashboardSyncStatusAction(
-            countAsync: syncCountAsync,
-            onRetry: () async {
-              await syncOrchestrator.syncPendingBags();
+          PopupMenuButton<_DashboardMenuAction>(
+            tooltip: 'Settings',
+            icon: const Icon(Icons.settings_outlined),
+            onSelected: (value) {
+              switch (value) {
+                case _DashboardMenuAction.about:
+                  unawaited(
+                    Navigator.of(context).push<void>(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const LegalNoticesScreen(),
+                      ),
+                    ),
+                  );
+              }
             },
+            itemBuilder: (_) => const [
+              PopupMenuItem<_DashboardMenuAction>(
+                value: _DashboardMenuAction.about,
+                child: Text('About'),
+              ),
+            ],
           ),
           const SizedBox(width: 8),
         ],
