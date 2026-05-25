@@ -91,6 +91,12 @@ At a glance, the app should still follow these product-level UI constraints:
 * Fast, low-friction flows that keep search, start, pause, and complete actions within one or two taps.
 * Clear loading, empty, offline, and error states with a recovery action on every important screen.
 * Material Design 3 as the baseline component and motion system.
+* The main logo/wordmark text currently uses the **Nunito** typeface.
+
+### Typography Licensing Note
+
+* The **Nunito** font used for the main logo/wordmark text is licensed under the **SIL Open Font License, Version 1.1**.
+* Include Nunito in the app's third-party license notices and reference OFL 1.1 in legal documentation.
 
 ### Testing Requirements
 

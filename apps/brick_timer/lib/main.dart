@@ -2,6 +2,7 @@ import 'package:brick_timer/env/env.dart';
 import 'package:brick_timer/repositories/ledger_repository.dart';
 import 'package:brick_timer/services/catalog_service.dart';
 import 'package:brick_timer/ui/dashboard/dashboard_screen.dart';
+import 'package:brick_timer/ui/settings/nunito_license.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,6 +13,8 @@ final ledgerRepository = LedgerRepository();
 /// Starts the application.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  registerNunitoLicense();
 
   // TODO(bramp): Let's add a splash screen
 
