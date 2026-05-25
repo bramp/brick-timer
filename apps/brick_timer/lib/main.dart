@@ -4,6 +4,7 @@ import 'package:brick_timer/services/catalog_service.dart';
 import 'package:brick_timer/ui/dashboard/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// The global ledger repository instance.
 final ledgerRepository = LedgerRepository();
@@ -50,6 +51,21 @@ class BrickTimerApp extends StatelessWidget {
       outlineVariant: Color(0xFF9ED8E8),
       error: _coralAccent,
     );
+    final baseTextTheme = ThemeData(useMaterial3: true).textTheme;
+    final textTheme = baseTextTheme.copyWith(
+      headlineLarge: GoogleFonts.nunito(
+        textStyle: baseTextTheme.headlineLarge,
+        fontWeight: FontWeight.w700,
+      ),
+      headlineMedium: GoogleFonts.nunito(
+        textStyle: baseTextTheme.headlineMedium,
+        fontWeight: FontWeight.w700,
+      ),
+      headlineSmall: GoogleFonts.nunito(
+        textStyle: baseTextTheme.headlineSmall,
+        fontWeight: FontWeight.w700,
+      ),
+    );
 
     return MaterialApp(
       title: 'Brick Timer',
@@ -57,10 +73,20 @@ class BrickTimerApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.light,
         colorScheme: colorScheme,
+        textTheme: textTheme,
         scaffoldBackgroundColor: _backgroundColor,
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           backgroundColor: _backgroundColor,
           foregroundColor: _onColor,
+          // TODO(bramp): Replace the AppBar title text with an SVG logo.
+          // Then remove the google_fonts dependency and Nunito overrides.
+          titleTextStyle: GoogleFonts.nunito(
+            textStyle: baseTextTheme.titleLarge?.copyWith(
+              color: _onColor,
+              fontSize: 26,
+            ),
+            fontWeight: FontWeight.w700,
+          ),
         ),
         cardTheme: const CardThemeData(
           color: _surfaceColor,
