@@ -92,7 +92,7 @@ void main() {
     await tester.tap(find.text('Lamborghini Sian FKP 37'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('Active builds'), findsOneWidget);
     expect(find.text('Lamborghini Sian FKP 37'), findsOneWidget);
   });
 
@@ -128,7 +128,7 @@ void main() {
     await tester.tap(find.text('Start Bag 1'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Building Bag 1'), findsOneWidget);
+    expect(find.text('Bag 1'), findsOneWidget);
     expect(find.text('Pause'), findsOneWidget);
 
     await tester.tap(find.text('Pause'));
@@ -140,12 +140,12 @@ void main() {
     await tester.tap(find.text('Resume'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Building Bag 1'), findsOneWidget);
+    expect(find.text('Bag 1'), findsOneWidget);
 
     await tester.tap(find.text('Finished Set!'));
     await tester.pumpAndSettle();
 
-    expect(find.text('No active sessions yet.'), findsOneWidget);
+    expect(find.text('No active build'), findsOneWidget);
     expect(find.text('Technic Race Car'), findsOneWidget);
   });
 }

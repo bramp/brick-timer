@@ -26,8 +26,8 @@ void main() {
     // Give it a moment to resolve the provider.
     await tester.pumpAndSettle();
 
-    // Verify that our app shows the dashboard title instead of basic text.
-    expect(find.text('Brick Timer'), findsOneWidget);
+    // Verify the dashboard content loads and primary CTA is shown.
+    expect(find.text('Active builds'), findsOneWidget);
     expect(find.text('Start New Build'), findsOneWidget);
   });
 }
