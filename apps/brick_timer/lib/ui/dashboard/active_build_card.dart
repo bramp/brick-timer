@@ -97,13 +97,6 @@ class ActiveBuildCard extends ConsumerWidget {
         Color(0xFFCDEFFF),
       ],
     };
-    final primaryStatusLabel = switch ((uiState, currentBag)) {
-      (_ActiveBuildUiState.finished, _) => 'Finished',
-      (_ActiveBuildUiState.building, final int bag) => 'Building Bag $bag',
-      (_ActiveBuildUiState.paused, final int bag) => 'Building Bag $bag',
-      (_ActiveBuildUiState.bagFinished, final int bag) => 'Bag $bag Finished',
-      _ => 'Starting',
-    };
     final secondaryStatusLabel = uiState == _ActiveBuildUiState.paused
         ? 'Paused'
         : null;
@@ -164,19 +157,10 @@ class ActiveBuildCard extends ConsumerWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Wrap(
-                                alignment: WrapAlignment.end,
-                                spacing: 8,
-                                runSpacing: 6,
-                                children: [
-                                  _StatusPill(label: primaryStatusLabel),
-                                  if (secondaryStatusLabel != null)
-                                    _StatusPill(label: secondaryStatusLabel),
-                                ],
-                              ),
-                            ),
+                            if (secondaryStatusLabel != null) ...[
+                              const SizedBox(width: 8),
+                              _StatusPill(label: secondaryStatusLabel),
+                            ],
                           ],
                         ),
                         const SizedBox(height: 4),
@@ -212,17 +196,18 @@ class ActiveBuildCard extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    Expanded(
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(minWidth: 96),
                       child: _MetricBlock(
-                        title: 'Total duration',
-                        value: timerLabel,
+                        title: 'Current bag',
+                        value: bagLabel,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: _MetricBlock(
-                        title: 'Current bag',
-                        value: bagLabel,
+                        title: 'Total duration',
+                        value: timerLabel,
                       ),
                     ),
                   ],
