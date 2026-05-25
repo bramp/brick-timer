@@ -16,6 +16,7 @@ import 'package:brick_timer/ui/search/lego_catalog_search_screen.dart';
 import 'package:brick_timer/ui/settings/legal_notices_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 enum _DashboardMenuAction { about }
 
@@ -36,7 +37,7 @@ class DashboardScreen extends ConsumerWidget {
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Brick Timer'),
+                const _DashboardBranding(),
                 const SizedBox(width: 12),
                 DashboardMetricChip(
                   label: 'Active',
@@ -57,7 +58,7 @@ class DashboardScreen extends ConsumerWidget {
               ],
             );
           },
-          orElse: () => const Text('Brick Timer'),
+          orElse: () => const _DashboardBranding(),
         ),
         centerTitle: false,
         actions: [
@@ -173,6 +174,30 @@ class DashboardScreen extends ConsumerWidget {
       MaterialPageRoute<void>(
         builder: (_) => const LegoCatalogSearchScreen(),
       ),
+    );
+  }
+}
+
+class _DashboardBranding extends StatelessWidget {
+  const _DashboardBranding();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SvgPicture.asset(
+          'assets/logo.svg',
+          width: 28,
+          height: 28,
+        ),
+        const SizedBox(width: 8),
+        SvgPicture.asset(
+          'assets/title.svg',
+          height: 22,
+          fit: BoxFit.fitHeight,
+        ),
+      ],
     );
   }
 }
