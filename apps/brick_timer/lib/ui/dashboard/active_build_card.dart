@@ -140,7 +140,7 @@ class ActiveBuildCard extends ConsumerWidget {
                     child: Container(
                       width: 116,
                       height: 116,
-                      color: theme.colorScheme.surface.withValues(alpha: 0.6),
+                      color: Colors.transparent,
                       child: LegoSetThumbnail(
                         imageUrl: set.imageUrl,
                       ),

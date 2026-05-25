@@ -42,7 +42,7 @@ class LegoSetThumbnail extends StatelessWidget {
         height: size,
         child: Image.network(
           imageUrl!,
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
           width: size,
           height: size,
           webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
@@ -61,10 +61,10 @@ class LegoSetThumbnail extends StatelessWidget {
       child: CachedNetworkImage(
         imageUrl: imageUrl!,
         cacheManager: cacheManager ?? LegoSetImageCacheManager.instance,
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         imageBuilder: (context, imageProvider) => Image(
           image: imageProvider,
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
           width: size,
           height: size,
         ),
