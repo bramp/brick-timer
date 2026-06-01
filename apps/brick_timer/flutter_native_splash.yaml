@@ -1,3 +1,4 @@
+# TODO(bramp): Generate platform splash assets directly via assets and retire flutter_native_splash.
 flutter_native_splash:
   color: "#93e4fc"
   image: "assets/splash.png"

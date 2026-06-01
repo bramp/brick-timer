@@ -1,0 +1,60 @@
+meta:
+  project: "Brick Timer"
+  render:
+    defaults:
+      tools: ["rsvg-convert", "copy"]
+    tools:
+      rsvg-convert:
+        tool: "rsvg-convert"
+        accepts: [".svg"]
+        produces: [".png"]
+        scale_modes: ["fit"]
+        command: "rsvg-convert -a -w {width} -h {height} -o {output} {input}"
+      copy:
+        tool: "cp"
+        accepts: [".svg"]
+        produces: [".svg"]
+        command: "cp {input} {output}"
+
+assets:
+  - source: "artwork/logo.svg"
+    owner: "Andrew Brampton"
+    copyright: "Copyright 2026 Andrew Brampton"
+    license: "Proprietary"
+    outputs:
+      - path: "apps/brick_timer/assets/app_icon.png"
+        width: 1024
+        height: 1024
+        options:
+          scale_mode: "fit"
+          background: "transparent"
+      - path: "apps/brick_timer/assets/logo.svg"
+        width: 1024
+        height: 1024
+        options:
+          tools: "copy"
+          scale_mode: "fit"
+          background: "transparent"
+  - source: "artwork/splash.svg"
+    owner: "Andrew Brampton"
+    copyright: "Copyright 2026 Andrew Brampton"
+    license: "Proprietary"
+    outputs:
+      - path: "apps/brick_timer/assets/splash.png"
+        width: 2048
+        height: 2048
+        options:
+          scale_mode: "fit"
+          background: "transparent"
+  - source: "artwork/title.svg"
+    owner: "Andrew Brampton"
+    copyright: "Copyright 2026 Andrew Brampton"
+    license: "Proprietary"
+    outputs:
+      - path: "apps/brick_timer/assets/title.svg"
+        width: 1024
+        height: 1024
+        options:
+          tools: "copy"
+          scale_mode: "fit"
+          background: "transparent"

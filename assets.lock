@@ -1,0 +1,84 @@
+{
+  "version": "1.0",
+  "last_updated_at": "2026-06-01T14:18:52Z",
+  "files": {
+    "apps/brick_timer/assets/app_icon.png": {
+      "sources": {
+        "artwork/logo.svg": {
+          "sha256": "f1dda6fc9e01cdf91ab29f6bca9badb7940a9a600d11aaf2ad33619230d1998f",
+          "size_bytes": 8892141
+        }
+      },
+      "provenance": {
+        "command_chain": [
+          "rsvg-convert -a -w {width} -h {height} -o {output} {input}",
+          "oxipng -o 3 --strip safe --out {output} {input}"
+        ],
+        "tools": {
+          "host_uname": "Darwin brampbook 25.5.0 Darwin Kernel Version 25.5.0: Mon Apr 27 20:39:09 PDT 2026; root:xnu-12377.121.6~2/RELEASE_ARM64_T6020 arm64",
+          "oxipng": "oxipng 10.1.1",
+          "rsvg-convert": "rsvg-convert version 2.62.2"
+        }
+      },
+      "sha256": "70e90e1f762b5c4670af57de12a9cc397f1fb6282ac19a23727c120ff5953d90",
+      "size_bytes": 121309
+    },
+    "apps/brick_timer/assets/logo.svg": {
+      "sources": {
+        "artwork/logo.svg": {
+          "sha256": "f1dda6fc9e01cdf91ab29f6bca9badb7940a9a600d11aaf2ad33619230d1998f",
+          "size_bytes": 8892141
+        }
+      },
+      "provenance": {
+        "command_chain": [
+          "cp {input} {output}"
+        ],
+        "tools": {
+          "host_uname": "Darwin brampbook 25.5.0 Darwin Kernel Version 25.5.0: Mon Apr 27 20:39:09 PDT 2026; root:xnu-12377.121.6~2/RELEASE_ARM64_T6020 arm64"
+        }
+      },
+      "sha256": "f1dda6fc9e01cdf91ab29f6bca9badb7940a9a600d11aaf2ad33619230d1998f",
+      "size_bytes": 8892141
+    },
+    "apps/brick_timer/assets/splash.png": {
+      "sources": {
+        "artwork/splash.svg": {
+          "sha256": "ba707216c6503017712d2e04527a560d2ad74fc21515fe9784a5316989b64eae",
+          "size_bytes": 75839
+        }
+      },
+      "provenance": {
+        "command_chain": [
+          "rsvg-convert -a -w {width} -h {height} -o {output} {input}",
+          "oxipng -o 3 --strip safe --out {output} {input}"
+        ],
+        "tools": {
+          "host_uname": "Darwin brampbook 25.5.0 Darwin Kernel Version 25.5.0: Mon Apr 27 20:39:09 PDT 2026; root:xnu-12377.121.6~2/RELEASE_ARM64_T6020 arm64",
+          "oxipng": "oxipng 10.1.1",
+          "rsvg-convert": "rsvg-convert version 2.62.2"
+        }
+      },
+      "sha256": "93906cb3703fd3e352001da4ae5e1847837b40ac9df23c33e8bc3925afd80404",
+      "size_bytes": 325493
+    },
+    "apps/brick_timer/assets/title.svg": {
+      "sources": {
+        "artwork/title.svg": {
+          "sha256": "dbc8c3173cf7854502d94ee6a2042f279f94b2a288e77aea22bb33e63ac5cc5a",
+          "size_bytes": 12564
+        }
+      },
+      "provenance": {
+        "command_chain": [
+          "cp {input} {output}"
+        ],
+        "tools": {
+          "host_uname": "Darwin brampbook 25.5.0 Darwin Kernel Version 25.5.0: Mon Apr 27 20:39:09 PDT 2026; root:xnu-12377.121.6~2/RELEASE_ARM64_T6020 arm64"
+        }
+      },
+      "sha256": "dbc8c3173cf7854502d94ee6a2042f279f94b2a288e77aea22bb33e63ac5cc5a",
+      "size_bytes": 12564
+    }
+  }
+}
