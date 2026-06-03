@@ -1,5 +1,3 @@
-# Flutter Template Makefile
-
 .DEFAULT_GOAL := all
 
 .PHONY: all deps run format analyze lint test test-ci test-unit-ci test-integration-ci fix upgrade clean app-icons app-splash app-assets precommit-install check-assets
@@ -90,8 +88,7 @@ $(GENERATED_ASSET_FILES): .assets.mk
 	@$(ASSETS) build --manifest $(ASSETS_MANIFEST) --target $@
 
 check-assets: .assets.mk
-	@$(ASSETS) check --manifest $(ASSETS_MANIFEST) --strict
-	@$(ASSETS) verify --manifest $(ASSETS_MANIFEST)
+	@$(ASSETS) verify -manifest $(ASSETS_MANIFEST) -strict
 
 app-icons: $(ICON_PNG)
 	$(APP) && dart run flutter_launcher_icons
