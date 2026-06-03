@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test:
@@ -15,35 +15,30 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
-
-      - name: Cache default Flutter artifacts
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.pub-cache/
-            /opt/hostedtoolcache/flutter/
-          key: ${{ runner.os }}-flutter-${{ hashFiles('pubspec.lock') }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
+          pub-cache: true
 
       - name: Install dependencies
-        working-directory: apps/brick_timer
-        run: flutter pub get
+        run: make deps
 
       - name: Build Web
         working-directory: apps/brick_timer
         run: |
           COMMIT_HASH=$(git rev-parse --short HEAD)
           BUILD_DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
-          flutter build web --release \
+          flutter build web --no-pub --release \
             --base-href "/lego-timer/" \
             --dart-define=COMMIT_HASH=$COMMIT_HASH \
             --dart-define=BUILD_DATE="$BUILD_DATE"

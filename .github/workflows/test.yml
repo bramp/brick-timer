@@ -30,22 +30,19 @@ jobs:
           pub-cache: true
 
       - name: Install dependencies
-        run: flutter pub get --enforce-lockfile
+        run: make deps
 
       - name: Check generated app assets
         run: make check-assets
-        continue-on-error: true
 
       - name: Check formatting
         run: make format && git diff --exit-code
-        continue-on-error: true
 
       - name: Static analysis
-        run: make lint FLUTTER_PUB_FLAGS=--no-pub
-        continue-on-error: true
+        run: make lint
 
       - name: Run unit tests
-        run: make test-unit-ci FLUTTER_PUB_FLAGS=--no-pub
+        run: make test-unit-ci
 
   integration:
     runs-on: macos-latest
@@ -61,7 +58,7 @@ jobs:
           pub-cache: true
 
       - name: Install dependencies
-        run: flutter pub get --enforce-lockfile
+        run: make deps
 
       - name: Run integration tests
-        run: make test-integration-ci FLUTTER_PUB_FLAGS=--no-pub TEST_DEVICE=macos
+        run: make test-integration-ci TEST_DEVICE=macos
