@@ -8,24 +8,29 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
-  test:
+  checks:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: stable
+          cache: false
 
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           cache: true
+          pub-cache: true
 
       - name: Install dependencies
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
 
       - name: Check generated app assets
         run: make check-assets
@@ -36,8 +41,27 @@ jobs:
         continue-on-error: true
 
       - name: Static analysis
-        run: make analyze
+        run: make lint FLUTTER_PUB_FLAGS=--no-pub
         continue-on-error: true
 
-      - name: Run tests
-        run: make test-ci
+      - name: Run unit tests
+        run: make test-unit-ci FLUTTER_PUB_FLAGS=--no-pub
+
+  integration:
+    runs-on: macos-latest
+    needs: checks
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+          pub-cache: true
+
+      - name: Install dependencies
+        run: flutter pub get --enforce-lockfile
+
+      - name: Run integration tests
+        run: make test-integration-ci FLUTTER_PUB_FLAGS=--no-pub TEST_DEVICE=macos

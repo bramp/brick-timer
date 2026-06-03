@@ -1,6 +1,6 @@
 # Flutter Template Makefile
 
-.PHONY: all run format analyze lint test test-ci fix upgrade clean app-icons app-splash app-assets precommit-install check-assets
+.PHONY: all deps run format analyze lint test test-ci test-unit-ci test-integration-ci fix upgrade clean app-icons app-splash app-assets precommit-install check-assets
 
 # Device to run on: chrome, macos, ios, android (default: chrome)
 DEVICE ?= chrome
@@ -26,7 +26,10 @@ TITLE_ASSET_SVG = $(APP_DIR)/assets/title.svg
 # Load generated asset dependency rules if present.
 -include .assets.mk
 
-all: format analyze test
+all: deps format analyze test
+
+deps:
+	flutter pub get --enforce-lockfile
 
 ## Run the app (use DEVICE=macos, DEVICE=ios, etc.)
 run:
@@ -37,7 +40,7 @@ format:
 
 analyze:
 	dart analyze --fatal-infos .
-	$(APP) && flutter analyze --fatal-infos
+	$(APP) && flutter analyze --no-pub --fatal-infos
 
 lint: analyze
 
@@ -51,15 +54,19 @@ precommit-install:
 	@"$(PRECOMMIT_BIN)" install
 
 test:
-	$(APP) && flutter test
+	$(APP) && flutter test --no-pub
 	$(CATALOG) && dart test
 
-test-ci:
-	$(APP) && flutter test --reporter=compact
-	$(APP) && for f in integration_test/*_test.dart; do \
-		flutter test "$$f" --reporter=compact -d $(TEST_DEVICE) || exit $$?; \
-	done
+test-unit-ci:
+	$(APP) && flutter test --no-pub --reporter=compact
 	$(CATALOG) && dart test --reporter=compact
+
+test-integration-ci:
+	$(APP) && for f in integration_test/*_test.dart; do \
+		flutter test "$$f" --no-pub --reporter=compact -d $(TEST_DEVICE) || exit $$?; \
+	done
+
+test-ci: test-unit-ci test-integration-ci
 
 fix:
 	dart fix --apply
