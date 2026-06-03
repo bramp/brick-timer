@@ -1,5 +1,7 @@
 # Flutter Template Makefile
 
+.DEFAULT_GOAL := all
+
 .PHONY: all deps run format analyze lint test test-ci test-unit-ci test-integration-ci fix upgrade clean app-icons app-splash app-assets precommit-install check-assets
 
 # Device to run on: chrome, macos, ios, android (default: chrome)
@@ -23,10 +25,10 @@ SPLASH_PNG = $(APP_DIR)/assets/splash.png
 LOGO_ASSET_SVG = $(APP_DIR)/assets/logo.svg
 TITLE_ASSET_SVG = $(APP_DIR)/assets/title.svg
 
+all: deps format analyze test
+
 # Load generated asset dependency rules if present.
 -include .assets.mk
-
-all: deps format analyze test
 
 deps:
 	flutter pub get --enforce-lockfile
