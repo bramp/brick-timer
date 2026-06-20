@@ -1,20 +1,71 @@
-name: Deploy to GitHub Pages
+name: CI and Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  test:
-    uses: ./.github/workflows/test.yml
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: stable
+          cache: false
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+          pub-cache: true
+
+      - name: Install dependencies
+        run: make deps
+
+      - name: Check generated app assets
+        run: make check-assets
+
+      - name: Check formatting
+        run: make format && git diff --exit-code
+
+      - name: Static analysis
+        run: make lint
+
+      - name: Run unit tests
+        run: make test-unit-ci
+
+  integration:
+    runs-on: macos-latest
+    needs: checks
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+          pub-cache: true
+
+      - name: Install dependencies
+        run: make deps
+
+      - name: Run integration tests
+        run: make test-integration-ci TEST_DEVICE=macos
 
   deploy:
-    needs: test
+    needs: integration
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
 
@@ -45,7 +96,6 @@ jobs:
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
-        if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./apps/bricktimer/build/web
