@@ -66,8 +66,12 @@ jobs:
     needs: integration
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     permissions:
-      contents: write
+      pages: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@v6
@@ -89,13 +93,24 @@ jobs:
         run: |
           COMMIT_HASH=$(git rev-parse --short HEAD)
           BUILD_DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
+
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          if [ "$REPO_NAME" = "${GITHUB_REPOSITORY_OWNER}.github.io" ]; then
+            BASE_HREF="/"
+          else
+            BASE_HREF="/${REPO_NAME}/"
+          fi
+
           flutter build web --no-pub --release \
-            --base-href "/lego-timer/" \
+            --base-href "$BASE_HREF" \
             --dart-define=COMMIT_HASH=$COMMIT_HASH \
             --dart-define=BUILD_DATE="$BUILD_DATE"
 
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./apps/bricktimer/build/web
+          path: ./apps/bricktimer/build/web
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
