@@ -10,14 +10,14 @@ TEST_DEVICE ?= $(shell if [ "$$(uname -s)" = "Darwin" ]; then echo macos; else e
 WEB_PORT ?= 3000
 
 # Shorthand for running commands in the app directory
-APP = cd apps/brick_timer
+APP = cd apps/bricktimer
 CATALOG = cd packages/lego_catalog
 PRECOMMIT_VENV = .venv/pre-commit
 PRECOMMIT_BIN = $(PRECOMMIT_VENV)/bin/pre-commit
 ASSETS ?= go run github.com/bramp/assets/cmd/assets@latest
 ASSETS_MANIFEST ?= assets.yaml
 
-APP_DIR = apps/brick_timer
+APP_DIR = apps/bricktimer
 ICON_PNG = $(APP_DIR)/assets/app_icon.png
 SPLASH_PNG = $(APP_DIR)/assets/splash.png
 LOGO_ASSET_SVG = $(APP_DIR)/assets/logo.svg

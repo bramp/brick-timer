@@ -22,13 +22,13 @@ assets:
     copyright: "Copyright 2026 Andrew Brampton"
     license: "Proprietary"
     outputs:
-      - path: "apps/brick_timer/assets/app_icon.png"
+      - path: "apps/bricktimer/assets/app_icon.png"
         width: 1024
         height: 1024
         options:
           scale_mode: "fit"
           background: "transparent"
-      - path: "apps/brick_timer/assets/logo.svg"
+      - path: "apps/bricktimer/assets/logo.svg"
         width: 1024
         height: 1024
         options:
@@ -40,7 +40,7 @@ assets:
     copyright: "Copyright 2026 Andrew Brampton"
     license: "Proprietary"
     outputs:
-      - path: "apps/brick_timer/assets/splash.png"
+      - path: "apps/bricktimer/assets/splash.png"
         width: 2048
         height: 2048
         options:
@@ -51,7 +51,7 @@ assets:
     copyright: "Copyright 2026 Andrew Brampton"
     license: "Proprietary"
     outputs:
-      - path: "apps/brick_timer/assets/title.svg"
+      - path: "apps/bricktimer/assets/title.svg"
         width: 1024
         height: 1024
         options:

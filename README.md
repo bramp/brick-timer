@@ -44,7 +44,7 @@ make run DEVICE=macos
 The app reads `REBRICKABLE_API_KEY` from:
 
 1. `--dart-define=REBRICKABLE_API_KEY=...` (highest priority)
-2. `apps/brick_timer/.env`
+2. `apps/bricktimer/.env`
 
 Example `.env` value:
 
@@ -55,7 +55,7 @@ REBRICKABLE_API_KEY=YOUR_API_KEY
 Example override:
 
 ```sh
-cd apps/brick_timer
+cd apps/bricktimer
 flutter run -d chrome --dart-define=REBRICKABLE_API_KEY=YOUR_API_KEY
 ```
 
@@ -71,11 +71,11 @@ The app now includes Firebase integration hooks for:
 
 Current wiring in this repository:
 
-- Dart dependencies: `apps/brick_timer/pubspec.yaml`
-- Android Gradle plugins: `apps/brick_timer/android/settings.gradle.kts`
-- Android app plugin application: `apps/brick_timer/android/app/build.gradle.kts`
+- Dart dependencies: `apps/bricktimer/pubspec.yaml`
+- Android Gradle plugins: `apps/bricktimer/android/settings.gradle.kts`
+- Android app plugin application: `apps/bricktimer/android/app/build.gradle.kts`
 - iOS/macOS native Firebase startup: `AppDelegate.swift`
-- Flutter runtime bootstrap: `apps/brick_timer/lib/services/firebase_bootstrap.dart`
+- Flutter runtime bootstrap: `apps/bricktimer/lib/services/firebase_bootstrap.dart`
 
 1. Install FlutterFire CLI (one-time):
 
@@ -83,10 +83,10 @@ Current wiring in this repository:
 dart pub global activate flutterfire_cli
 ```
 
-2. From `apps/brick_timer`, configure Firebase for your platforms:
+2. From `apps/bricktimer`, configure Firebase for your platforms:
 
 ```sh
-cd apps/brick_timer
+cd apps/bricktimer
 flutterfire configure
 ```
 
@@ -125,7 +125,7 @@ To keep Firebase components current, update all three layers below.
 Check and upgrade:
 
 ```sh
-cd apps/brick_timer
+cd apps/bricktimer
 flutter pub outdated
 flutter pub upgrade firebase_core firebase_analytics firebase_crashlytics firebase_app_check
 ```
@@ -138,7 +138,7 @@ The Android plugin versions are pinned in the `plugins` block:
 - `com.google.firebase.crashlytics`
 
 Review latest versions from official docs and bump both plugin versions in
-`apps/brick_timer/android/settings.gradle.kts` when needed.
+`apps/bricktimer/android/settings.gradle.kts` when needed.
 
 References:
 
@@ -150,8 +150,8 @@ References:
 After package or config updates, refresh CocoaPods lockfiles:
 
 ```sh
-cd apps/brick_timer/ios && pod install
-cd apps/brick_timer/macos && pod install
+cd apps/bricktimer/ios && pod install
+cd apps/bricktimer/macos && pod install
 ```
 
 ### Firebase Update Checklist
@@ -167,7 +167,7 @@ make test-unit-ci
 And smoke test Firebase-enabled startup:
 
 ```sh
-cd apps/brick_timer
+cd apps/bricktimer
 flutter run -d macos --dart-define=FIREBASE_ENABLED=true
 ```
 
@@ -222,6 +222,6 @@ remain:
 - `namespace = "net.bramp.bricktimer"`
 - `applicationId = "net.bramp.bricktimer"`
 
-If the guard fails, fix `apps/brick_timer/android/app/build.gradle.kts` before
+If the guard fails, fix `apps/bricktimer/android/app/build.gradle.kts` before
 committing.
 

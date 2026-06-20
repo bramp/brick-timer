@@ -1,11 +1,11 @@
-name: brick_timer_workspace
+name: bricktimer_workspace
 publish_to: none
 
 environment:
   sdk: ^3.11.0
 
 workspace:
-  - apps/brick_timer
+  - apps/bricktimer
   - packages/lego_catalog
 
 dev_dependencies:
