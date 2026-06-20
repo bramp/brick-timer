@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all
 
-.PHONY: all deps run format analyze lint test test-ci test-unit-ci test-integration-ci fix upgrade clean app-icons app-splash app-assets precommit-install check-assets
+.PHONY: all deps run format analyze lint test test-ci test-unit-ci test-integration-ci fix upgrade clean app-icons app-splash app-assets precommit-install check-assets regen-flutter verify-android-package
 
 # Device to run on: chrome, macos, ios, android (default: chrome)
 DEVICE ?= chrome
@@ -97,3 +97,18 @@ app-splash: $(SPLASH_PNG)
 	$(APP) && dart run flutter_native_splash:create
 
 app-assets: $(GENERATED_ASSET_FILES) app-icons app-splash
+
+## Regenerate Flutter platform scaffolding for existing app.
+## Run occasionally after Flutter SDK upgrades to refresh generated host files.
+regen-flutter:
+	$(APP) && flutter create . \
+		--org net.bramp \
+		--platforms=android,ios,macos,linux,windows,web \
+		--android-language kotlin
+	@rm -f $(APP_DIR)/README.md $(APP_DIR)/analysis_options.yaml
+	$(MAKE) verify-android-package
+
+## Guard against accidental package-name regressions during regeneration.
+verify-android-package:
+	@grep -q 'namespace = "net.bramp.bricktimer"' $(APP_DIR)/android/app/build.gradle.kts || (echo "Expected Android namespace net.bramp.bricktimer" && exit 1)
+	@grep -q 'applicationId = "net.bramp.bricktimer"' $(APP_DIR)/android/app/build.gradle.kts || (echo "Expected Android applicationId net.bramp.bricktimer" && exit 1)

@@ -1,4 +1,4 @@
-package net.bramp.bricktimer.brick_timer
+package net.bramp.bricktimer
 
 import io.flutter.embedding.android.FlutterActivity
 

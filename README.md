@@ -206,3 +206,22 @@ make format
 make analyze
 ```
 
+### Refresh Generated Flutter Platform Files
+
+You can periodically regenerate Flutter host/platform scaffolding (for example,
+after Flutter SDK upgrades):
+
+```sh
+make regen-flutter
+```
+
+This runs `flutter create` in the existing app directory to refresh generated
+native/host files. It then runs a guard check to ensure Android package values
+remain:
+
+- `namespace = "net.bramp.bricktimer"`
+- `applicationId = "net.bramp.bricktimer"`
+
+If the guard fails, fix `apps/brick_timer/android/app/build.gradle.kts` before
+committing.
+

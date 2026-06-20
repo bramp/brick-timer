@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "net.bramp.bricktimer.brick_timer"
+    namespace = "net.bramp.bricktimer"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "net.bramp.bricktimer.brick_timer"
+        applicationId = "net.bramp.bricktimer"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
