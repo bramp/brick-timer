@@ -1,6 +1,7 @@
 import 'package:brick_timer/env/env.dart';
 import 'package:brick_timer/repositories/ledger_repository.dart';
 import 'package:brick_timer/services/catalog_service.dart';
+import 'package:brick_timer/services/firebase_bootstrap.dart';
 import 'package:brick_timer/ui/dashboard/dashboard_screen.dart';
 import 'package:brick_timer/ui/settings/nunito_license.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,8 @@ final ledgerRepository = LedgerRepository();
 /// Starts the application.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await FirebaseBootstrap.initialize();
 
   registerNunitoLicense();
 
@@ -72,6 +75,7 @@ class BrickTimerApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'Brick Timer',
+      navigatorObservers: FirebaseBootstrap.navigatorObservers,
       themeMode: ThemeMode.light,
       theme: ThemeData(
         brightness: Brightness.light,

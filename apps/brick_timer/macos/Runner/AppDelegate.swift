@@ -1,8 +1,17 @@
 import Cocoa
+import FirebaseCore
 import FlutterMacOS
 
 @main
 class AppDelegate: FlutterAppDelegate {
+  override func applicationDidFinishLaunching(_ notification: Notification) {
+    if FirebaseApp.app() == nil {
+      FirebaseApp.configure()
+    }
+
+    super.applicationDidFinishLaunching(notification)
+  }
+
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
     return true
   }

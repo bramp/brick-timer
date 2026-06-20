@@ -61,6 +61,124 @@ flutter run -d chrome --dart-define=REBRICKABLE_API_KEY=YOUR_API_KEY
 
 Warning: This key is then built into the resulting binaries.
 
+### Firebase Setup (Crashlytics, Analytics, App Check)
+
+The app now includes Firebase integration hooks for:
+
+- Crash reporting (`firebase_crashlytics`)
+- Usage telemetry (`firebase_analytics`)
+- Integrity attestation (`firebase_app_check` with Play Integrity / App Attest)
+
+Current wiring in this repository:
+
+- Dart dependencies: `apps/brick_timer/pubspec.yaml`
+- Android Gradle plugins: `apps/brick_timer/android/settings.gradle.kts`
+- Android app plugin application: `apps/brick_timer/android/app/build.gradle.kts`
+- iOS/macOS native Firebase startup: `AppDelegate.swift`
+- Flutter runtime bootstrap: `apps/brick_timer/lib/services/firebase_bootstrap.dart`
+
+1. Install FlutterFire CLI (one-time):
+
+```sh
+dart pub global activate flutterfire_cli
+```
+
+2. From `apps/brick_timer`, configure Firebase for your platforms:
+
+```sh
+cd apps/brick_timer
+flutterfire configure
+```
+
+This generates platform config files (for example, `google-services.json`,
+`GoogleService-Info.plist`) and Firebase options used by Flutter.
+
+If you add/remove platforms later, rerun `flutterfire configure`.
+
+3. Enable Firebase at runtime:
+
+```sh
+flutter run -d chrome --dart-define=FIREBASE_ENABLED=true
+```
+
+Optional (web App Check):
+
+```sh
+flutter run -d chrome \
+	--dart-define=FIREBASE_ENABLED=true \
+	--dart-define=FIREBASE_APPCHECK_RECAPTCHA_SITE_KEY=YOUR_RECAPTCHA_V3_SITE_KEY
+```
+
+Notes:
+
+- In debug mode, App Check uses debug providers.
+- In non-debug builds, Android uses Play Integrity and Apple platforms use
+  App Attest with DeviceCheck fallback.
+- Crashlytics collection is disabled in debug builds by default.
+
+### Keeping Firebase Versions Up To Date
+
+To keep Firebase components current, update all three layers below.
+
+1. FlutterFire Dart packages (`pubspec.yaml`)
+
+Check and upgrade:
+
+```sh
+cd apps/brick_timer
+flutter pub outdated
+flutter pub upgrade firebase_core firebase_analytics firebase_crashlytics firebase_app_check
+```
+
+2. Android Gradle plugin versions (`android/settings.gradle.kts`)
+
+The Android plugin versions are pinned in the `plugins` block:
+
+- `com.google.gms.google-services`
+- `com.google.firebase.crashlytics`
+
+Review latest versions from official docs and bump both plugin versions in
+`apps/brick_timer/android/settings.gradle.kts` when needed.
+
+References:
+
+- Google Services plugin: https://developers.google.com/android/guides/google-services-plugin
+- Crashlytics Gradle plugin: https://firebase.google.com/docs/crashlytics/get-started?platform=android
+
+3. Apple pods (iOS/macOS)
+
+After package or config updates, refresh CocoaPods lockfiles:
+
+```sh
+cd apps/brick_timer/ios && pod install
+cd apps/brick_timer/macos && pod install
+```
+
+### Firebase Update Checklist
+
+After any Firebase version change, run this quick verification:
+
+```sh
+make deps
+make analyze
+make test-unit-ci
+```
+
+And smoke test Firebase-enabled startup:
+
+```sh
+cd apps/brick_timer
+flutter run -d macos --dart-define=FIREBASE_ENABLED=true
+```
+
+Recommended automation:
+
+- Enable Dependabot or Renovate so PRs are opened automatically for:
+	- Dart/Flutter packages (`pubspec.yaml`)
+	- Gradle plugins (`*.gradle.kts`, including `android/settings.gradle.kts`)
+
+This is the best way to ensure pinned Android plugin versions do not go stale.
+
 ### Tests
 
 Run all unit tests (app + package):
