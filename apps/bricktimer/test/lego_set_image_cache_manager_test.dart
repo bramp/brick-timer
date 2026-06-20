@@ -58,9 +58,9 @@ void main() {
   setUpAll(() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
-    final supportDir = Directory('/tmp/brick_timer_test_support')
+    final supportDir = Directory('/tmp/bricktimer_test_support')
       ..createSync(recursive: true);
-    final tempDir = Directory('/tmp/brick_timer_test_temp')
+    final tempDir = Directory('/tmp/bricktimer_test_temp')
       ..createSync(recursive: true);
     PathProviderPlatform.instance = _FakePathProviderPlatform(
       supportPath: supportDir.path,

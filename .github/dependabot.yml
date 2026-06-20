@@ -12,7 +12,7 @@ updates:
       semver-patch-days: 3  # Short wait to ensure a patch isn't immediately yanked
 
   - package-ecosystem: "pub"
-    directory: "/apps/brick_timer"
+    directory: "/apps/bricktimer"
     schedule:
       interval: "weekly"
       day: "friday"

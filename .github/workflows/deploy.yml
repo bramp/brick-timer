@@ -34,7 +34,7 @@ jobs:
         run: make deps
 
       - name: Build Web
-        working-directory: apps/brick_timer
+        working-directory: apps/bricktimer
         run: |
           COMMIT_HASH=$(git rev-parse --short HEAD)
           BUILD_DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
@@ -48,4 +48,4 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./apps/brick_timer/build/web
+          publish_dir: ./apps/bricktimer/build/web
