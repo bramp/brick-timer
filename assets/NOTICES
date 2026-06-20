@@ -11509,8 +11509,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
 google_fonts
+path_provider
 path_provider_android
 path_provider_foundation
+path_provider_platform_interface
 vector_graphics
 vector_graphics_compiler
 
@@ -25660,9 +25662,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 --------------------------------------------------------------------------------
-path_provider
 path_provider_linux
-path_provider_platform_interface
 path_provider_windows
 plugin_platform_interface
 vector_graphics_codec
@@ -32621,7 +32621,7 @@ xml
 
 The MIT License
 
-Copyright (c) 2006-2025 Lukas Renggli.
+Copyright (c) 2006-2026 Lukas Renggli.
 All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
