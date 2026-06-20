@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "99422701171",
+    "project_id": "bricktimer-bramp-net",
+    "storage_bucket": "bricktimer-bramp-net.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:99422701171:android:1118268157e06a92a70c06",
+        "android_client_info": {
+          "package_name": "net.bramp.bricktimer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGONZKwSlgKUyRq3lv5fD5n4YwqYmINJg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

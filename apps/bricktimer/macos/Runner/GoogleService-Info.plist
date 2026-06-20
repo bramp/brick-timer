@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyAZLJ3_MWf2iRIWyP4toXJdExh9wthWjvA</string>
+	<key>GCM_SENDER_ID</key>
+	<string>99422701171</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>net.bramp.bricktimer</string>
+	<key>PROJECT_ID</key>
+	<string>bricktimer-bramp-net</string>
+	<key>STORAGE_BUCKET</key>
+	<string>bricktimer-bramp-net.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:99422701171:ios:6562b0167d980c37a70c06</string>
+</dict>
+</plist>
