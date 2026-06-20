@@ -59,7 +59,7 @@ cd apps/bricktimer
 flutter run -d chrome --dart-define=REBRICKABLE_API_KEY=YOUR_API_KEY
 ```
 
-Warning: This key is then built into the resulting binaries.
+Warning: This key is then built into the resulting binaries (with very minor [envied obfuscation](https://pub.dev/packages/envied#obfuscation--encryption)).
 
 ### Firebase Setup (Crashlytics, Analytics, App Check)
 
