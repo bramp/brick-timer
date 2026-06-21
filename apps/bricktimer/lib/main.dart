@@ -1,6 +1,4 @@
-import 'package:bricktimer/env/env.dart';
 import 'package:bricktimer/repositories/ledger_repository.dart';
-import 'package:bricktimer/services/catalog_service.dart';
 import 'package:bricktimer/services/firebase_bootstrap.dart';
 import 'package:bricktimer/ui/dashboard/dashboard_screen.dart';
 import 'package:bricktimer/ui/settings/nunito_license.dart';
@@ -22,11 +20,6 @@ void main() async {
   // TODO(bramp): Let's add a splash screen
 
   await ledgerRepository.init();
-
-  final catalogService = CatalogService.create(
-    rebrickableApiKey: Env.rebrickableApiKey,
-  );
-  await catalogService.warmUp();
 
   runApp(const ProviderScope(child: BrickTimerApp()));
 }
