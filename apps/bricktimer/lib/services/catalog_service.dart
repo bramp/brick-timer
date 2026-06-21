@@ -1,13 +1,9 @@
 import 'package:bricktimer/repositories/ledger_repository.dart';
 import 'package:bricktimer/services/rebrickable_theme_cache_service.dart';
 import 'package:drift/drift.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:flutter/foundation.dart';
 import 'package:lego_catalog/lego_catalog.dart';
-
-/// Supported catalog backend implementations.
-enum CatalogBackendType {
-  /// Rebrickable API-backed catalog.
-  rebrickable,
-}
 
 /// App adapter that maps generic catalog models to drift companions.
 class CatalogService {
@@ -18,15 +14,18 @@ class CatalogService {
   }) : _backend = backend,
        _themeCacheService = themeCacheService;
 
-  /// Creates a catalog service using the selected backend type.
-  factory CatalogService.create({
-    required String rebrickableApiKey,
-    CatalogBackendType backendType = CatalogBackendType.rebrickable,
-  }) {
-    switch (backendType) {
-      case CatalogBackendType.rebrickable:
-        return CatalogService.rebrickable(apiKey: rebrickableApiKey);
-    }
+  /// Creates a catalog adapter backed by the Brick Timer backend service.
+  factory CatalogService.brickTimer({String? baseUrl}) {
+    final backend = BrickTimerBackend(
+      baseUrl:
+          baseUrl ??
+          const String.fromEnvironment(
+            _catalogBaseUrlDefine,
+            defaultValue: _defaultCatalogBaseUrl,
+          ),
+      additionalHeadersProvider: _firebaseAppCheckHeaders,
+    );
+    return CatalogService(backend: backend);
   }
 
   /// Creates a catalog adapter backed by Rebrickable.
@@ -39,6 +38,11 @@ class CatalogService {
       ),
     );
   }
+
+  static const String _catalogBaseUrlDefine = 'BRICKTIMER_CATALOG_BASE_URL';
+  // TODO(bramp): Change to remote config, so this can easily be changed
+  static const String _defaultCatalogBaseUrl =
+      'https://us-central1-bricktimer-bramp-net.cloudfunctions.net/bricktimerCatalog';
 
   final LegoCatalogBackend _backend;
   final RebrickableThemeCacheService? _themeCacheService;
@@ -108,5 +112,18 @@ class CatalogService {
         imageUrl: Value(set.imageUrl),
       );
     }).toList();
+  }
+
+  static Future<Map<String, String>> _firebaseAppCheckHeaders() async {
+    try {
+      final token = await FirebaseAppCheck.instance.getToken();
+      if (token != null && token.trim().isNotEmpty) {
+        return {'X-Firebase-AppCheck': token.trim()};
+      }
+    } on Object catch (error, stackTrace) {
+      debugPrint('Skipping App Check header: $error\n$stackTrace');
+    }
+
+    return const <String, String>{};
   }
 }

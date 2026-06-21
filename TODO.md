@@ -38,6 +38,7 @@
 - [ ] Wire the GitHub Pages build metadata (`COMMIT_HASH` and `BUILD_DATE`) into the app UI, using a small `BuildInfo` helper backed by `String.fromEnvironment`, similar to https://github.com/bramp/grids `apps/grids/lib/build_info.dart`.
 - [ ] Pull down to refresh on the Dashboard (the search screen already has it).
 - [ ] Make all text copyable (beyond the error details section in search).
+- [ ] Look into using `flutter_makefile` (https://pub.dev/packages/flutter_makefile) for build/task workflow automation.
 - [ ] Fix SVG asset compatibility warnings by cleaning unsupported editor metadata (e.g. `sodipodi:namedview`, `inkscape:path-effect`) from app SVG files, and add a lightweight validation step so bad SVGs do not regress.
 - [ ] Fix Flutter web viewport warning by removing the custom `<meta name="viewport">` from `web/index.html` and relying on Flutter's managed viewport configuration.
 

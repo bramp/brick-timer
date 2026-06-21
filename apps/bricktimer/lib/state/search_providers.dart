@@ -1,15 +1,10 @@
 import 'dart:async';
 
-import 'package:bricktimer/env/env.dart';
 import 'package:bricktimer/repositories/ledger_repository.dart';
-import 'package:bricktimer/services/catalog_service.dart';
+import 'package:bricktimer/state/catalog_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Provider for the LEGO Catalog API service.
-final legoCatalogServiceProvider = Provider<CatalogService>((ref) {
-  // TODO(bramp): Later swap this to FirebaseProxyService
-  return CatalogService.create(rebrickableApiKey: Env.rebrickableApiKey);
-});
+export 'package:bricktimer/state/catalog_providers.dart';
 
 /// The current search query.
 class SearchQueryNotifier extends Notifier<String> {
