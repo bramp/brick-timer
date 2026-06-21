@@ -36,10 +36,12 @@ run:
 	$(APP) && flutter run -d $(DEVICE)
 
 format:
-	dart format .
+	@find apps packages \
+		\( -name build -o -name .dart_tool \) -prune -o \
+		-name '*.dart' -print0 | xargs -0 dart format
 
 analyze:
-	dart analyze --fatal-infos .
+	dart analyze --fatal-infos apps/bricktimer_service packages/lego_catalog
 	$(APP) && flutter analyze --no-pub --fatal-infos
 
 lint: analyze
