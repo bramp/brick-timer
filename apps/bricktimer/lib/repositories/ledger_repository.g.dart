@@ -1209,10 +1209,7 @@ final class $$LegoSetsTableReferences
   _buildSessionsRefsTable(_$LedgerRepository db) =>
       MultiTypedResultKey.fromTable(
         db.buildSessions,
-        aliasName: $_aliasNameGenerator(
-          db.legoSets.id,
-          db.buildSessions.legoSetId,
-        ),
+        aliasName: 'lego_sets__id__build_sessions__lego_set_id',
       );
 
   $$BuildSessionsTableProcessedTableManager get buildSessionsRefs {
@@ -1511,9 +1508,7 @@ final class $$BuildSessionsTableReferences
   );
 
   static $LegoSetsTable _legoSetIdTable(_$LedgerRepository db) =>
-      db.legoSets.createAlias(
-        $_aliasNameGenerator(db.buildSessions.legoSetId, db.legoSets.id),
-      );
+      db.legoSets.createAlias('build_sessions__lego_set_id__lego_sets__id');
 
   $$LegoSetsTableProcessedTableManager get legoSetId {
     final $_column = $_itemColumn<int>('lego_set_id')!;
@@ -1533,10 +1528,7 @@ final class $$BuildSessionsTableReferences
   _bagIntervalsRefsTable(_$LedgerRepository db) =>
       MultiTypedResultKey.fromTable(
         db.bagIntervals,
-        aliasName: $_aliasNameGenerator(
-          db.buildSessions.id,
-          db.bagIntervals.buildSessionId,
-        ),
+        aliasName: 'build_sessions__id__bag_intervals__build_session_id',
       );
 
   $$BagIntervalsTableProcessedTableManager get bagIntervalsRefs {
@@ -1914,13 +1906,9 @@ final class $$BagIntervalsTableReferences
         BaseReferences<_$LedgerRepository, $BagIntervalsTable, BagInterval> {
   $$BagIntervalsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $BuildSessionsTable _buildSessionIdTable(_$LedgerRepository db) =>
-      db.buildSessions.createAlias(
-        $_aliasNameGenerator(
-          db.bagIntervals.buildSessionId,
-          db.buildSessions.id,
-        ),
-      );
+  static $BuildSessionsTable _buildSessionIdTable(_$LedgerRepository db) => db
+      .buildSessions
+      .createAlias('bag_intervals__build_session_id__build_sessions__id');
 
   $$BuildSessionsTableProcessedTableManager get buildSessionId {
     final $_column = $_itemColumn<int>('build_session_id')!;
