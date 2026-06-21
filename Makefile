@@ -39,7 +39,7 @@ deps:
 # Keep this as a full incremental build so new generators are picked up
 # automatically without Makefile dependency maintenance.
 codegen:
-	@test -f apps/bricktimer/.env || (echo "Missing apps/bricktimer/.env. Copy apps/bricktimer/.env.example to apps/bricktimer/.env and set REBRICKABLE_API_KEY." && exit 1)
+	@test -f apps/bricktimer/.env || echo "Warning: apps/bricktimer/.env is missing. Create it from apps/bricktimer/.env.example if you need REBRICKABLE_API_KEY locally."
 	$(APP) && dart run build_runner build
 
 ## Run the app (use DEVICE=macos, DEVICE=ios, etc.)
