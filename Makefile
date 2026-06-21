@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all
 
-.PHONY: all deps run format analyze lint test test-ci test-unit-ci test-integration-ci fix upgrade clean app-icons app-splash app-assets precommit-install check-assets regen-flutter verify-android-package
+.PHONY: all deps codegen run format analyze lint test test-ci test-unit-ci test-integration-ci fix build_runner upgrade clean app-icons app-splash app-assets precommit-install check-assets regen-flutter verify-android-package
 
 # Device to run on: chrome, macos, ios, android (default: chrome)
 DEVICE ?= chrome
@@ -18,6 +18,7 @@ ASSETS ?= go run github.com/bramp/assets/cmd/assets@latest
 ASSETS_MANIFEST ?= assets.yaml
 
 APP_DIR = apps/bricktimer
+
 ICON_PNG = $(APP_DIR)/assets/app_icon.png
 SPLASH_PNG = $(APP_DIR)/assets/splash.png
 LOGO_ASSET_SVG = $(APP_DIR)/assets/logo.svg
@@ -31,8 +32,18 @@ all: deps format analyze test
 deps:
 	flutter pub get --enforce-lockfile
 
+# Build runner outputs currently used in the app package:
+# - apps/bricktimer/lib/env/env.g.dart (from envied_generator)
+# - apps/bricktimer/lib/repositories/ledger_repository.g.dart (from drift_dev)
+#
+# Keep this as a full incremental build so new generators are picked up
+# automatically without Makefile dependency maintenance.
+codegen:
+	@test -f apps/bricktimer/.env || (echo "Missing apps/bricktimer/.env. Copy apps/bricktimer/.env.example to apps/bricktimer/.env and set REBRICKABLE_API_KEY." && exit 1)
+	$(APP) && dart run build_runner build
+
 ## Run the app (use DEVICE=macos, DEVICE=ios, etc.)
-run:
+run: codegen
 	$(APP) && flutter run -d $(DEVICE)
 
 format:
@@ -40,7 +51,7 @@ format:
 		\( -name build -o -name .dart_tool \) -prune -o \
 		-name '*.dart' -print0 | xargs -0 dart format
 
-analyze:
+analyze: codegen
 	dart analyze --fatal-infos apps/bricktimer_service packages/lego_catalog
 	$(APP) && flutter analyze --no-pub --fatal-infos
 
@@ -55,15 +66,15 @@ precommit-install:
 	fi
 	@"$(PRECOMMIT_BIN)" install
 
-test:
+test: codegen
 	$(APP) && flutter test --no-pub
 	$(CATALOG) && dart test
 
-test-unit-ci:
+test-unit-ci: codegen
 	$(APP) && flutter test --no-pub --reporter=compact
 	$(CATALOG) && dart test --reporter=compact
 
-test-integration-ci:
+test-integration-ci: codegen
 	$(APP) && for f in integration_test/*_test.dart; do \
 		flutter test "$$f" --no-pub --reporter=compact -d $(TEST_DEVICE) || exit $$?; \
 	done
@@ -74,7 +85,7 @@ fix:
 	dart fix --apply
 
 build_runner:
-	$(APP) && dart run build_runner build --delete-conflicting-outputs
+	$(MAKE) codegen
 
 upgrade:
 	dart pub upgrade --major-versions --tighten
