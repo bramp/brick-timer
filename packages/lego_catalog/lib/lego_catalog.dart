@@ -1,3 +1,4 @@
+export 'src/backends/bricktimer_backend.dart';
 export 'src/backends/lego_catalog_backend.dart';
 export 'src/backends/rebrickable/lego_theme.dart';
 export 'src/backends/rebrickable_backend.dart';
