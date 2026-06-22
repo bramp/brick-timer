@@ -38,7 +38,7 @@ flutter pub get
 ```sh
 cd apps/bricktimer_service
 # For local runs outside deployed Functions runtime, provide the secret as env
-REBRICKABLE_API_KEY=your_key_here dart run bin/main.dart
+REBRICKABLE_API_KEY=your_key_here dart run bin/server.dart
 ```
 
 4. Point the app at the local backend when running Flutter:

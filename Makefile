@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all
 
-.PHONY: all deps codegen run format analyze lint test test-ci test-unit-ci test-integration-ci fix build_runner upgrade clean app-icons app-splash app-assets precommit-install check-assets regen-flutter verify-android-package
+.PHONY: all deps codegen run format analyze lint test test-ci test-unit-ci test-integration-ci fix build_runner upgrade clean app-icons app-splash app-assets precommit-install check-assets regen-flutter verify-android-package deploy-service-prepare deploy-service
 
 # Device to run on: chrome, macos, ios, android (default: chrome)
 DEVICE ?= chrome
@@ -12,10 +12,13 @@ WEB_PORT ?= 3000
 # Shorthand for running commands in the app directory
 APP = cd apps/bricktimer
 CATALOG = cd packages/lego_catalog
+SERVICE = cd apps/bricktimer_service
 PRECOMMIT_VENV = .venv/pre-commit
 PRECOMMIT_BIN = $(PRECOMMIT_VENV)/bin/pre-commit
 ASSETS ?= go run github.com/bramp/assets/cmd/assets@latest
 ASSETS_MANIFEST ?= assets.yaml
+FIREBASE_SERVICE_CODEBASE ?= bricktimer-service
+FIREBASE_PROJECT_ID ?=
 
 APP_DIR = apps/bricktimer
 
@@ -125,3 +128,16 @@ regen-flutter:
 verify-android-package:
 	@grep -q 'namespace = "net.bramp.bricktimer"' $(APP_DIR)/android/app/build.gradle.kts || (echo "Expected Android namespace net.bramp.bricktimer" && exit 1)
 	@grep -q 'applicationId = "net.bramp.bricktimer"' $(APP_DIR)/android/app/build.gradle.kts || (echo "Expected Android applicationId net.bramp.bricktimer" && exit 1)
+
+deploy-service-prepare:
+	@command -v firebase >/dev/null || (echo "firebase CLI is required. Install with: npm install -g firebase-tools" && exit 1)
+	$(SERVICE) && dart run build_runner build
+
+## Deploy Cloud Functions for the service.
+deploy-service: deploy-service-prepare
+	@if [ -z "$(FIREBASE_PROJECT_ID)" ]; then \
+		echo "FIREBASE_PROJECT_ID is required for service deploy."; \
+		exit 1; \
+	fi
+	firebase experiments:enable dartfunctions
+	$(SERVICE) && firebase deploy --only functions:$(FIREBASE_SERVICE_CODEBASE) --project "$(FIREBASE_PROJECT_ID)"

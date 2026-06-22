@@ -62,10 +62,32 @@ jobs:
       - name: Run integration tests
         run: make test-integration-ci TEST_DEVICE=macos
 
-  deploy:
-    needs: integration
+  changes:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    outputs:
+      web_changed: ${{ steps.filter.outputs.web }}
+      service_changed: ${{ steps.filter.outputs.service }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            web:
+              - 'apps/bricktimer/**'
+              - 'packages/lego_catalog/**'
+            service:
+              - 'apps/bricktimer_service/**'
+              - 'packages/lego_catalog/**'
+
+  deploy-web:
+    needs: [integration, changes]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.changes.outputs.web_changed == 'true'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -93,13 +115,7 @@ jobs:
         run: |
           COMMIT_HASH=$(git rev-parse --short HEAD)
           BUILD_DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
-
-          REPO_NAME="${GITHUB_REPOSITORY#*/}"
-          if [ "$REPO_NAME" = "${GITHUB_REPOSITORY_OWNER}.github.io" ]; then
-            BASE_HREF="/"
-          else
-            BASE_HREF="/${REPO_NAME}/"
-          fi
+          BASE_HREF="/"
 
           flutter build web --no-pub --release \
             --base-href "$BASE_HREF" \
@@ -114,3 +130,47 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  deploy-firebase:
+    needs: [integration, changes]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.changes.outputs.service_changed == 'true' && secrets.FIREBASE_PROJECT_ID_PROD != '' && secrets.FIREBASE_TOKEN_PROD != ''
+    environment:
+      name: production
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+          pub-cache: true
+
+      - name: Install dependencies
+        run: make deps
+
+      - name: Ensure generated functions manifest is up to date
+        working-directory: apps/bricktimer_service
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Enable Dart Functions experiment
+        run: firebase experiments:enable dartfunctions
+
+      - name: Deploy Cloud Functions
+        working-directory: apps/bricktimer_service
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID_PROD }}
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_PROD }}
+        run: firebase deploy --only functions:bricktimer-service --project "$FIREBASE_PROJECT_ID" --token "$FIREBASE_TOKEN" --non-interactive

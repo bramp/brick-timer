@@ -48,3 +48,25 @@
 - [ ] Add an integration test for crash recovery: simulate an app restart with an open-ended `BagInterval` (null `endTime`) and verify `ActiveSessionNotifier` correctly closes it on hydration.
 - [ ] Harden `SyncOrchestrator` with exponential back-off retry for transient network failures, so a single bad network moment does not permanently strand unsynced records.
 - [ ] Harden the sync status widget: surface the last-error state and show a visible "retry" affordance when sync fails, rather than only showing an unsynced count.
+
+## Phase 6: Makefile Structure Cleanup
+- [ ] Define a target naming convention by scope: `app-*`, `service-*`, `catalog-*`, and `repo-*`.
+- [ ] Split generation targets into explicit scope:
+  - [ ] `codegen-app` for `apps/bricktimer`
+  - [ ] `codegen-service` for `apps/bricktimer_service`
+  - [ ] `codegen-catalog` for `packages/lego_catalog` (if/when generators are added)
+  - [ ] `codegen-all` as the aggregate target
+- [ ] Keep `codegen` as a temporary compatibility alias with a deprecation note in comments.
+- [ ] Rename deploy targets for consistency:
+  - [ ] `deploy-service-staging` -> `service-deploy-staging`
+  - [ ] `deploy-service-prod` -> `service-deploy-prod`
+  - [ ] `deploy-service-prepare` -> `service-deploy-prepare`
+- [ ] Add `help` target that prints grouped targets and one-line descriptions.
+- [ ] Group Makefile sections in this order:
+  - [ ] Core/shared (`deps`, `format`, `lint`, `test`)
+  - [ ] App targets
+  - [ ] Service targets
+  - [ ] Catalog/package targets
+  - [ ] Deploy targets
+- [ ] Ensure CI and docs reference only the new canonical target names.
+- [ ] Update README docs with examples for local staging deploy and CI-only production deploy policy.

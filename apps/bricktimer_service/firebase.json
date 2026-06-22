@@ -1,0 +1,16 @@
+{
+  "functions": [
+    {
+      "source": ".",
+      "codebase": "bricktimer-service",
+      "ignore": [
+        ".dart_tool",
+        ".git",
+        "build",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "test"
+      ]
+    }
+  ]
+}
