@@ -49,3 +49,7 @@ app.*.map.json
 # Environment variables
 .env
 .env.*
+
+# Local Firebase/Dart functions artifacts
+apps/bricktimer_service/.firebaserc
+apps/bricktimer_service/bin/server
