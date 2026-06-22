@@ -59,6 +59,9 @@ jobs:
       - name: Install dependencies
         run: make deps
 
+      - name: Install FlutterFire CLI
+        run: dart pub global activate flutterfire_cli
+
       - name: Run integration tests
         run: make test-integration-ci TEST_DEVICE=macos
 
@@ -73,7 +76,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |

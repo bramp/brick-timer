@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:firebase_functions/firebase_functions.dart';
 import 'package:lego_catalog/lego_catalog.dart';
+import 'package:shelf_router/shelf_router.dart';
 
 /// Small Brick Timer HTTP API for app-facing catalog requests.
 class BrickTimerCatalogService {
@@ -13,7 +14,24 @@ class BrickTimerCatalogService {
 
   /// Handles a single HTTP request.
   Future<Response> handle(Request request) async {
-    if (request.method != 'GET') {
+    final router = Router()
+      ..get('/health', (request) => _jsonResponse(200, {'status': 'ok'}))
+      ..get('/v1/sets/search', _handleSearch)
+      ..get('/v1/sets/<setNumber>', _handleDetails);
+
+    final response = await router.call(request);
+
+    if (response.statusCode == 404) {
+      return _jsonResponse(
+        404,
+        {
+          'error': 'not_found',
+          'message': 'Unknown endpoint.',
+        },
+      );
+    }
+
+    if (response.statusCode == 405) {
       return _jsonResponse(
         405,
         {
@@ -24,23 +42,7 @@ class BrickTimerCatalogService {
       );
     }
 
-    final route = _parseRoute(request.url.pathSegments);
-    switch (route) {
-      case _BrickTimerRoute.health:
-        return _jsonResponse(200, {'status': 'ok'});
-      case _BrickTimerRoute.search:
-        return _handleSearch(request);
-      case _BrickTimerRoute.details:
-        return _handleDetails(request);
-      case _BrickTimerRoute.unknown:
-        return _jsonResponse(
-          404,
-          {
-            'error': 'not_found',
-            'message': 'Unknown endpoint.',
-          },
-        );
-    }
+    return response;
   }
 
   Future<Response> _handleSearch(Request request) async {
@@ -86,9 +88,8 @@ class BrickTimerCatalogService {
     );
   }
 
-  Future<Response> _handleDetails(Request request) async {
-    final setNumber = _setNumberFromPath(request.url.pathSegments);
-    if (setNumber == null || setNumber.isEmpty) {
+  Future<Response> _handleDetails(Request request, String setNumber) async {
+    if (setNumber.trim().isEmpty) {
       return _jsonResponse(
         400,
         {
@@ -98,7 +99,8 @@ class BrickTimerCatalogService {
       );
     }
 
-    final details = await _backend.getSetDetails(setNumber);
+    final decodedSetNumber = Uri.decodeComponent(setNumber);
+    final details = await _backend.getSetDetails(decodedSetNumber);
     if (details == null) {
       return _jsonResponse(
         404,
@@ -110,37 +112,6 @@ class BrickTimerCatalogService {
     }
 
     return _jsonResponse(200, _serializeDetails(details));
-  }
-
-  static _BrickTimerRoute _parseRoute(List<String> pathSegments) {
-    if (pathSegments.length == 1 && pathSegments.first == 'health') {
-      return _BrickTimerRoute.health;
-    }
-
-    if (pathSegments.length == 3 &&
-        pathSegments[0] == 'v1' &&
-        pathSegments[1] == 'sets' &&
-        pathSegments[2] == 'search') {
-      return _BrickTimerRoute.search;
-    }
-
-    if (pathSegments.length == 3 &&
-        pathSegments[0] == 'v1' &&
-        pathSegments[1] == 'sets') {
-      return _BrickTimerRoute.details;
-    }
-
-    return _BrickTimerRoute.unknown;
-  }
-
-  static String? _setNumberFromPath(List<String> pathSegments) {
-    if (pathSegments.length != 3 ||
-        pathSegments[0] != 'v1' ||
-        pathSegments[1] != 'sets') {
-      return null;
-    }
-
-    return Uri.decodeComponent(pathSegments[2]);
   }
 
   static Map<String, dynamic> _serializeSummary(LegoSetSummary summary) {
@@ -232,11 +203,4 @@ class BrickTimerCatalogService {
       },
     );
   }
-}
-
-enum _BrickTimerRoute {
-  health,
-  search,
-  details,
-  unknown,
 }

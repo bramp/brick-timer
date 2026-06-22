@@ -12,6 +12,7 @@ dependencies:
   firebase_functions: ^0.6.0
   lego_catalog:
     path: ../../packages/lego_catalog
+  shelf_router: ^1.1.4
 
 dev_dependencies:
   build_runner: ^2.15.0
