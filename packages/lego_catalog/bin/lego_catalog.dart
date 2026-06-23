@@ -2,7 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:dio/dio.dart';
 import 'package:lego_catalog/lego_catalog.dart';
+import 'package:logging/logging.dart';
+
+final Logger _log = Logger('lego_catalog');
 
 Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
@@ -12,24 +16,35 @@ Future<void> main(List<String> arguments) async {
       negatable: false,
       help: 'Show this usage information.',
     )
-    ..addCommand('search')
-    ..addCommand('details');
-
-  parser.commands['search']!
-    ..addOption('backend', defaultsTo: 'rebrickable')
+    ..addOption(
+      'log-level',
+      defaultsTo: _defaultLogLevelName,
+      allowed: _supportedLogLevels,
+      help: 'Logging level.',
+    )
+    ..addOption(
+      'backend',
+      defaultsTo: _rebrickableBackend,
+      allowed: _supportedBackends,
+      help: 'Catalog backend to query.',
+    )
     ..addOption(
       'api-key',
       help:
           'API key for the selected backend. '
           'Defaults to REBRICKABLE_API_KEY when omitted.',
     )
-    ..addOption('page-size', defaultsTo: '20')
     ..addOption('base-url', help: 'Optional backend base URL override.')
     ..addOption('connect-timeout-ms', defaultsTo: '10000')
     ..addOption('receive-timeout-ms', defaultsTo: '10000')
     ..addOption('send-timeout-ms', defaultsTo: '10000')
     ..addOption('retries', defaultsTo: '3')
     ..addOption('initial-retry-delay-ms', defaultsTo: '250')
+    ..addCommand('search')
+    ..addCommand('details');
+
+  parser.commands['search']!
+    ..addOption('page-size', defaultsTo: '20')
     ..addFlag(
       'help',
       abbr: 'h',
@@ -38,19 +53,6 @@ Future<void> main(List<String> arguments) async {
     );
 
   parser.commands['details']!
-    ..addOption('backend', defaultsTo: 'rebrickable')
-    ..addOption(
-      'api-key',
-      help:
-          'API key for the selected backend. '
-          'Defaults to REBRICKABLE_API_KEY when omitted.',
-    )
-    ..addOption('base-url', help: 'Optional backend base URL override.')
-    ..addOption('connect-timeout-ms', defaultsTo: '10000')
-    ..addOption('receive-timeout-ms', defaultsTo: '10000')
-    ..addOption('send-timeout-ms', defaultsTo: '10000')
-    ..addOption('retries', defaultsTo: '3')
-    ..addOption('initial-retry-delay-ms', defaultsTo: '250')
     ..addFlag(
       'help',
       abbr: 'h',
@@ -74,6 +76,14 @@ Future<void> main(List<String> arguments) async {
     return;
   }
 
+  final parsedLogLevel = (parsed['log-level'] as String?) ?? _defaultLogLevelName;
+  final envLogLevel = (Platform.environment['LOG_LEVEL'] ?? '').trim();
+  final resolvedLogLevel = parsed.wasParsed('log-level')
+      ? parsedLogLevel
+      : (envLogLevel.isNotEmpty ? envLogLevel : parsedLogLevel);
+
+  _configureLogging(resolvedLogLevel);
+
   final command = parsed.command;
   if (command == null) {
     stdout.writeln(_usage(parser));
@@ -86,7 +96,9 @@ Future<void> main(List<String> arguments) async {
   }
 
   try {
-    final backend = _buildBackend(command);
+    final backendName = (parsed['backend'] as String?)?.trim() ?? '';
+    _log.info('Command: ${command.name}');
+    final backend = _buildBackend(parsed);
 
     if (command.name == 'search') {
       final query = command.rest.join(' ').trim();
@@ -95,7 +107,14 @@ Future<void> main(List<String> arguments) async {
       }
 
       final pageSize = int.parse(command['page-size'] as String);
-      final result = await backend.searchSets(query, pageSize: pageSize);
+      _log.info(
+        'Starting search: backend=$backendName, pageSize=$pageSize, query="$query"',
+      );
+      final result = await backend.searchSets(
+        query,
+        pageSize: pageSize,
+      );
+      _log.info('Search completed: ${result.length} result(s)');
       stdout.writeln(
         const JsonEncoder.withIndent('  ').convert(
           result.map((set) => set.toJson()).toList(),
@@ -112,7 +131,12 @@ Future<void> main(List<String> arguments) async {
         );
       }
 
+      _log.info(
+        'Starting details lookup: backend=$backendName, setNumber=$setNumber',
+      );
+
       final result = await backend.getSetDetails(setNumber);
+      _log.info('Details lookup completed: ${result == null ? 'not found' : 'found'}');
       if (result == null) {
         stdout.writeln('null');
       } else {
@@ -133,52 +157,169 @@ Future<void> main(List<String> arguments) async {
   }
 }
 
-LegoCatalogBackend _buildBackend(ArgResults command) {
-  final backendName = (command['backend'] as String?)?.trim() ?? '';
-  if (backendName != 'rebrickable') {
-    throw FormatException('Unsupported backend: $backendName');
-  }
-
-  final apiKeyFromFlag = (command['api-key'] as String?)?.trim() ?? '';
-  final apiKeyFromEnv = (Platform.environment['REBRICKABLE_API_KEY'] ?? '')
-      .trim();
-  final apiKey = apiKeyFromFlag.isNotEmpty ? apiKeyFromFlag : apiKeyFromEnv;
-  if (apiKey.isEmpty) {
-    throw const FormatException(
-      'Missing API key. Provide --api-key or set REBRICKABLE_API_KEY.',
-    );
-  }
-
-  final baseUrl = (command['base-url'] as String?)?.trim();
-
-  return RebrickableBackend(
-    apiKey: apiKey,
-    baseUrl: (baseUrl == null || baseUrl.isEmpty)
-        ? 'https://rebrickable.com/api/v3/lego'
-        : baseUrl,
+LegoCatalogBackend _buildBackend(ArgResults root) {
+  final backendName = (root['backend'] as String?)?.trim() ?? '';
+  final dio = _createCliDio();
+  final baseUrl = (root['base-url'] as String?)?.trim();
+  final httpConfig = CatalogHttpConfig(
     connectTimeout: Duration(
-      milliseconds: int.parse(command['connect-timeout-ms'] as String),
+      milliseconds: int.parse(root['connect-timeout-ms'] as String),
     ),
     receiveTimeout: Duration(
-      milliseconds: int.parse(command['receive-timeout-ms'] as String),
+      milliseconds: int.parse(root['receive-timeout-ms'] as String),
     ),
     sendTimeout: Duration(
-      milliseconds: int.parse(command['send-timeout-ms'] as String),
+      milliseconds: int.parse(root['send-timeout-ms'] as String),
     ),
-    retries: int.parse(command['retries'] as String),
+    retries: int.parse(root['retries'] as String),
     initialRetryDelay: Duration(
-      milliseconds: int.parse(command['initial-retry-delay-ms'] as String),
+      milliseconds: int.parse(root['initial-retry-delay-ms'] as String),
     ),
   );
+
+  switch (backendName) {
+    case _rebrickableBackend:
+      final apiKeyFromFlag = (root['api-key'] as String?)?.trim() ?? '';
+      final apiKeyFromEnv =
+          (Platform.environment['REBRICKABLE_API_KEY'] ?? '').trim();
+      final apiKey = apiKeyFromFlag.isNotEmpty ? apiKeyFromFlag : apiKeyFromEnv;
+      if (apiKey.isEmpty) {
+        throw const FormatException(
+          'Missing API key. Provide --api-key or set REBRICKABLE_API_KEY.',
+        );
+      }
+
+      return RebrickableBackend(
+        apiKey: apiKey,
+        dio: dio,
+        baseUrl: (baseUrl == null || baseUrl.isEmpty)
+            ? 'https://rebrickable.com/api/v3/lego'
+            : baseUrl,
+        httpConfig: httpConfig,
+      );
+    case _bricktimerBackend:
+      final resolvedBaseUrl =
+          baseUrl ?? (Platform.environment['BRICKTIMER_BASE_URL'] ?? '').trim();
+      if (resolvedBaseUrl.isEmpty) {
+        throw const FormatException(
+          'Missing Brick Timer base URL. Provide --base-url or set '
+          'BRICKTIMER_BASE_URL.',
+        );
+      }
+
+      return BrickTimerBackend(
+        baseUrl: resolvedBaseUrl,
+        dio: dio,
+        httpConfig: httpConfig,
+      );
+    default:
+      throw FormatException(
+        'Unsupported backend: $backendName. '
+        'Supported backends: ${_supportedBackends.join(', ')}',
+      );
+  }
 }
 
+Dio _createCliDio() {
+  final dio = Dio();
+  dio.interceptors.add(
+    LogInterceptor(
+      request: true,
+      requestHeader: true,
+      requestBody: false,
+      responseHeader: false,
+      responseBody: false,
+      error: true,
+      logPrint: (Object obj) {
+        Logger('lego_catalog').finer(obj.toString());
+      },
+    ),
+  );
+  return dio;
+}
+
+void _configureLogging(String levelName) {
+  Logger.root.level = _parseLogLevel(levelName);
+  hierarchicalLoggingEnabled = true;
+
+  Logger.root.onRecord.listen((record) {
+    final timestamp = record.time.toIso8601String();
+    final message =
+        '$timestamp ${record.level.name.padRight(7)} '
+        '${record.loggerName}: ${record.message}';
+
+    stderr.writeln(message);
+    if (record.error != null) {
+      stderr.writeln('  error: ${record.error}');
+    }
+    if (record.stackTrace != null) {
+      stderr.writeln(record.stackTrace);
+    }
+  });
+}
+
+Level _parseLogLevel(String value) {
+  switch (value.toLowerCase()) {
+    case 'all':
+      return Level.ALL;
+    case 'finest':
+      return Level.FINEST;
+    case 'finer':
+      return Level.FINER;
+    case 'fine':
+      return Level.FINE;
+    case 'info':
+      return Level.INFO;
+    case 'warning':
+      return Level.WARNING;
+    case 'severe':
+      return Level.SEVERE;
+    case 'shout':
+      return Level.SHOUT;
+    case 'off':
+      return Level.OFF;
+    default:
+      return Level.INFO;
+  }
+}
+
+const String _rebrickableBackend = 'rebrickable';
+const String _bricktimerBackend = 'bricktimer';
+const List<String> _supportedBackends = <String>[
+  _rebrickableBackend,
+  _bricktimerBackend,
+];
+const String _defaultLogLevelName = 'info';
+const List<String> _supportedLogLevels = <String>[
+  'all',
+  'finest',
+  'finer',
+  'fine',
+  'info',
+  'warning',
+  'severe',
+  'shout',
+  'off',
+];
+
 String _usage(ArgParser parser) {
+  final searchUsage = parser.commands['search']?.usage ?? '';
+  final detailsUsage = parser.commands['details']?.usage ?? '';
+
   return [
-    'Usage: dart run lego_catalog <command> [options] <arg>',
+    'Usage: dart run lego_catalog [global options] <command> [command options] <arg>',
     '',
     'Commands:',
     '  search <query>             Search sets by query.',
     '  details <set-number>       Fetch details for one set number.',
+    '',
+    'Search options:',
+    searchUsage,
+    '',
+    'Details options:',
+    detailsUsage,
+    '',
+    'Tip: Use `dart run lego_catalog <command> -h` for command-specific help.',
     '',
     parser.usage,
   ].join('\n');
@@ -187,7 +328,7 @@ String _usage(ArgParser parser) {
 String _commandUsage(ArgParser parser, ArgResults command) {
   if (command.name == 'search') {
     return [
-      'Usage: dart run lego_catalog search [options] <query>',
+      'Usage: dart run lego_catalog [global options] search [options] <query>',
       '',
       parser.commands['search']?.usage ?? '',
     ].join('\n');
@@ -195,7 +336,7 @@ String _commandUsage(ArgParser parser, ArgResults command) {
 
   if (command.name == 'details') {
     return [
-      'Usage: dart run lego_catalog details [options] <set-number>',
+      'Usage: dart run lego_catalog [global options] details [options] <set-number>',
       '',
       parser.commands['details']?.usage ?? '',
     ].join('\n');

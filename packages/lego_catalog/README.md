@@ -12,6 +12,11 @@ Reusable LEGO catalog library with pluggable backends, plus a small CLI for manu
   - Uses `dio` for HTTP
   - Uses `dio_smart_retry` for retry + backoff
   - Configurable timeouts, retries, retry delay, and base URL
+  - Theme filtering with descendant resolution
+- Brick Timer implementation: `BrickTimerBackend`
+  - Simple pass-through catalog service backend
+  - Uses shared HTTP infrastructure
+  - Designed as a server-side proxy to keep API keys private
 - CLI executable: `lego_catalog`
 
 ## Library Usage
@@ -64,16 +69,30 @@ Search command:
 ```bash
 export REBRICKABLE_API_KEY="your-key"
 
-dart run lego_catalog search \
+dart run lego_catalog \
   --backend rebrickable \
+  search \
+  "Lamborghini"
+
+dart run lego_catalog \
+  --backend bricktimer \
+  search \
+  --base-url "https://bricktimer.example.com" \
   "Lamborghini"
 ```
 
 Details command:
 
 ```bash
-dart run lego_catalog details \
+dart run lego_catalog \
   --backend rebrickable \
+  details \
+  "42115"
+
+dart run lego_catalog \
+  --backend bricktimer \
+  details \
+  --base-url "https://bricktimer.example.com" \
   "42115"
 ```
 
@@ -81,6 +100,9 @@ dart run lego_catalog details \
 `REBRICKABLE_API_KEY` from your environment.
 
 If both are provided, `--api-key` takes precedence.
+
+For `--backend bricktimer`, configure service URL via `--base-url` or
+`BRICKTIMER_BASE_URL`.
 
 ### Optional CLI Tuning Flags
 
@@ -92,13 +114,19 @@ Both commands support:
 - `--send-timeout-ms`
 - `--retries`
 - `--initial-retry-delay-ms`
+- `--log-level` (`all`, `finest`, `finer`, `fine`, `info`, `warning`, `severe`, `shout`, `off`)
+
+You can also set `LOG_LEVEL` in the environment when `--log-level` is not
+provided.
 
 Example:
 
 ```bash
-dart run lego_catalog search \
+dart run lego_catalog \
   --backend rebrickable \
+  search \
   "Technic" \
+  --log-level fine \
   --retries 5 \
   --initial-retry-delay-ms 100 \
   --connect-timeout-ms 8000
@@ -134,3 +162,5 @@ class MyCatalogBackend implements LegoCatalogBackend {
 ```
 
 Then inject it wherever needed (app providers, tests, CLI extensions, etc.).
+
+See [DESIGN.md](DESIGN.md) for detailed architecture documentation.
