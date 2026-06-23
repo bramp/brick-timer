@@ -1,6 +1,11 @@
+import 'package:json_annotation/json_annotation.dart';
+import 'package:lego_catalog/src/json/catalog_json_converters.dart';
 import 'package:lego_catalog/src/models/lego_set.dart';
 
+part 'bricktimer_models.g.dart';
+
 /// Wire model for the Brick Timer catalog search response.
+@JsonSerializable(createToJson: false)
 class BrickTimerLegoSetSummary {
   /// Creates a Brick Timer set summary DTO.
   const BrickTimerLegoSetSummary({
@@ -11,25 +16,23 @@ class BrickTimerLegoSetSummary {
   });
 
   /// Parses a set summary from the Brick Timer backend payload.
-  factory BrickTimerLegoSetSummary.fromJson(Map<String, dynamic> json) {
-    return BrickTimerLegoSetSummary(
-      setNumber: _stringValue(json, 'setNumber'),
-      name: _stringValue(json, 'name', fallback: 'Unknown Set'),
-      totalPieces: _intValue(json, 'totalPieces'),
-      imageUrl: _stringOrNull(json, 'imageUrl'),
-    );
-  }
+  factory BrickTimerLegoSetSummary.fromJson(Map<String, dynamic> json) =>
+      _$BrickTimerLegoSetSummaryFromJson(json);
 
   /// Canonical set identifier (for example, `10316-1`).
+  @NonEmptyStringOrEmptyFallbackConverter()
   final String setNumber;
 
   /// Human-readable set name.
+  @NonEmptyStringOrUnknownSetFallbackConverter()
   final String name;
 
   /// Total number of pieces in the set.
+  @FlexibleIntConverter()
   final int totalPieces;
 
   /// Optional image URL for the set.
+  @NonEmptyStringOrNullConverter()
   final String? imageUrl;
 
   /// Converts the Brick Timer DTO into the shared catalog model.
@@ -44,6 +47,7 @@ class BrickTimerLegoSetSummary {
 }
 
 /// Wire model for the Brick Timer catalog details response.
+@JsonSerializable(createToJson: false)
 class BrickTimerLegoSetDetails {
   /// Creates a Brick Timer set details DTO.
   const BrickTimerLegoSetDetails({
@@ -54,25 +58,23 @@ class BrickTimerLegoSetDetails {
   });
 
   /// Parses set details from the Brick Timer backend payload.
-  factory BrickTimerLegoSetDetails.fromJson(Map<String, dynamic> json) {
-    return BrickTimerLegoSetDetails(
-      setNumber: _stringValue(json, 'setNumber'),
-      name: _stringValue(json, 'name', fallback: 'Unknown Set'),
-      totalPieces: _intValue(json, 'totalPieces'),
-      imageUrl: _stringOrNull(json, 'imageUrl'),
-    );
-  }
+  factory BrickTimerLegoSetDetails.fromJson(Map<String, dynamic> json) =>
+      _$BrickTimerLegoSetDetailsFromJson(json);
 
   /// Canonical set identifier (for example, `10316-1`).
+  @NonEmptyStringOrEmptyFallbackConverter()
   final String setNumber;
 
   /// Human-readable set name.
+  @NonEmptyStringOrUnknownSetFallbackConverter()
   final String name;
 
   /// Total number of pieces in the set.
+  @FlexibleIntConverter()
   final int totalPieces;
 
   /// Optional image URL for the set.
+  @NonEmptyStringOrNullConverter()
   final String? imageUrl;
 
   /// Converts the Brick Timer DTO into the shared catalog model.
@@ -84,38 +86,4 @@ class BrickTimerLegoSetDetails {
       imageUrl: imageUrl,
     );
   }
-}
-
-String _stringValue(
-  Map<String, dynamic> json,
-  String key, {
-  String fallback = '',
-}) {
-  final value = json[key];
-  if (value is String && value.trim().isNotEmpty) {
-    return value;
-  }
-
-  return fallback;
-}
-
-String? _stringOrNull(Map<String, dynamic> json, String key) {
-  final value = json[key];
-  if (value is String && value.trim().isNotEmpty) {
-    return value;
-  }
-
-  return null;
-}
-
-int _intValue(Map<String, dynamic> json, String key) {
-  final value = json[key];
-  if (value is int) {
-    return value;
-  }
-  if (value is String) {
-    return int.tryParse(value) ?? 0;
-  }
-
-  return 0;
 }

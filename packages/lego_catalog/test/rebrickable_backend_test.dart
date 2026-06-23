@@ -29,7 +29,7 @@ void main() {
   group('RebrickableBackend.searchSets', () {
     test('parses successful API response', () async {
       final adapter = _MockAdapter((request) async {
-        expect(request.path, '/sets/');
+        expect(request.uri.path, '/api/v3/lego/sets/');
         expect(request.queryParameters['search'], 'Lamborghini');
         expect(request.queryParameters['ordering'], '-year');
         expect(request.queryParameters['min_parts'], '1');
@@ -102,10 +102,10 @@ void main() {
       final backend = RebrickableBackend(
         apiKey: 'TEST_KEY',
         dio: dio,
-        initialRetryDelay: Duration.zero,
+        httpConfig: const CatalogHttpConfig(initialRetryDelay: Duration.zero),
       );
 
-      final results = await backend.searchSets(
+      final results = await backend.searchSetsAdvanced(
         'technic',
         excludedThemeRootIds: const {},
       );
@@ -133,7 +133,7 @@ void main() {
 
     test('filters excluded theme descendants from results', () async {
       final adapter = _MockAdapter((request) async {
-        if (request.path == '/themes/') {
+        if (request.uri.path == '/api/v3/lego/themes/') {
           return ResponseBody.fromString(
             jsonEncode({
               'next': null,
@@ -150,7 +150,7 @@ void main() {
           );
         }
 
-        expect(request.path, '/sets/');
+        expect(request.uri.path, '/api/v3/lego/sets/');
         return ResponseBody.fromString(
           jsonEncode({
             'results': [
@@ -188,7 +188,7 @@ void main() {
 
     test('supports disabling theme exclusions', () async {
       final adapter = _MockAdapter((request) async {
-        expect(request.path, '/sets/');
+        expect(request.uri.path, '/api/v3/lego/sets/');
         return ResponseBody.fromString(
           jsonEncode({
             'results': [
@@ -211,7 +211,7 @@ void main() {
       final dio = Dio()..httpClientAdapter = adapter;
       final backend = RebrickableBackend(apiKey: 'TEST_KEY', dio: dio);
 
-      final results = await backend.searchSets(
+      final results = await backend.searchSetsAdvanced(
         'star wars',
         excludedThemeRootIds: const {},
       );
@@ -225,7 +225,7 @@ void main() {
   group('RebrickableBackend.getSetDetails', () {
     test('normalizes set number by appending default version suffix', () async {
       final adapter = _MockAdapter((request) async {
-        expect(request.path, '/sets/42096-1/');
+        expect(request.uri.path, '/api/v3/lego/sets/42096-1/');
         return ResponseBody.fromString(
           jsonEncode({
             'set_num': '42096-1',
@@ -252,7 +252,7 @@ void main() {
 
     test('keeps explicit set version when suffix is already present', () async {
       final adapter = _MockAdapter((request) async {
-        expect(request.path, '/sets/42096-3/');
+        expect(request.uri.path, '/api/v3/lego/sets/42096-3/');
         return ResponseBody.fromString(
           jsonEncode({
             'set_num': '42096-3',

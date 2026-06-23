@@ -2,8 +2,8 @@
 class RebrickableSearchFilterPolicy {
   /// Creates a policy used to build search params and post-filter results.
   RebrickableSearchFilterPolicy({
-    this.minParts = 1,
-    Set<int> excludedThemeRootIds = const {501},
+    this.minParts = 0,
+    Set<int> excludedThemeRootIds = const {},
     this.includeDescendantThemesInExclusion = true,
   }) : excludedThemeRootIds = Set<int>.unmodifiable(excludedThemeRootIds) {
     if (minParts < 0) {

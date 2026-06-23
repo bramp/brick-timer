@@ -1,18 +1,17 @@
 import 'package:lego_catalog/src/backends/rebrickable/lego_theme.dart';
-import 'package:lego_catalog/src/backends/rebrickable/rebrickable_api_client.dart';
 
 /// Resolves excluded theme IDs, optionally including descendants.
 class RebrickableThemeExclusionResolver {
   /// Creates a resolver for excluded theme IDs.
   RebrickableThemeExclusionResolver({
-    required RebrickableApiClient apiClient,
+    required Future<List<LegoTheme>> Function() listThemes,
     required Set<int> rootThemeIds,
     required bool includeDescendantThemes,
-  }) : _apiClient = apiClient,
+  }) : _listThemes = listThemes,
        _rootThemeIds = Set<int>.unmodifiable(rootThemeIds),
        _includeDescendantThemes = includeDescendantThemes;
 
-  final RebrickableApiClient _apiClient;
+  final Future<List<LegoTheme>> Function() _listThemes;
   final Set<int> _rootThemeIds;
   final bool _includeDescendantThemes;
 
@@ -65,7 +64,7 @@ class RebrickableThemeExclusionResolver {
 
   Future<List<LegoTheme>> _safeListThemes() async {
     try {
-      return await _apiClient.listThemes();
+      return await _listThemes();
     } on Exception {
       // If theme lookup fails, continue with configured roots only.
       return const <LegoTheme>[];
