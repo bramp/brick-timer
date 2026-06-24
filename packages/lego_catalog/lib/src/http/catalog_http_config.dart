@@ -24,6 +24,7 @@ class CatalogHttpConfig {
   /// Number of times to retry transient failures (timeouts, 429, 5xx).
   final int retries;
 
-  /// Initial delay before the first retry; subsequent retries use exponential backoff.
+  /// Initial delay before the first retry; subsequent retries use
+  /// exponential backoff.
   final Duration initialRetryDelay;
 }

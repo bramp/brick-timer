@@ -9,8 +9,6 @@ import 'package:logging/logging.dart';
 /// Backends compose this client for transport concerns while keeping domain
 /// mapping and filtering in backend-specific code.
 class CatalogApiClient {
-  static final Logger _logger = Logger('lego_catalog.http.catalog_api_client');
-
   /// Creates a concrete catalog API client.
   CatalogApiClient({
     Dio? dio,
@@ -40,6 +38,8 @@ class CatalogApiClient {
     );
   }
 
+  static final Logger _logger = Logger('lego_catalog.http.catalog_api_client');
+
   final Dio _dio;
   final bool _ownsDio;
   final Future<Map<String, String>> Function()? _additionalHeadersProvider;
@@ -63,8 +63,8 @@ class CatalogApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    final requestOptions = options ?? await buildRequestOptions();
-    requestOptions.responseType = ResponseType.json;
+    final requestOptions = (options ?? await buildRequestOptions())
+      ..responseType = ResponseType.json;
     _logger.finest(
       'HTTP GET $path query=$queryParameters headers='
       '${_redactedHeaders(requestOptions.headers)}',
@@ -115,7 +115,7 @@ class CatalogApiClient {
   /// Validates that [data] is a JSON object and returns it as a map.
   Map<String, dynamic> asJsonMap(Object? data) {
     if (data is! Map<String, dynamic>) {
-      throw CatalogHttpException(
+      throw const CatalogHttpException(
         message: 'Request returned an invalid response payload.',
       );
     }

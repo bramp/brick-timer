@@ -11,8 +11,6 @@ import 'package:lego_catalog/src/models/lego_set.dart';
 
 /// Rebrickable-backed implementation of [LegoCatalogBackend].
 class RebrickableBackend implements LegoCatalogBackend {
-  static const String _defaultBaseUrl = 'https://rebrickable.com';
-
   /// Creates a backend with configurable retry, timeout, and base URL options.
   RebrickableBackend({
     required String apiKey,
@@ -25,7 +23,19 @@ class RebrickableBackend implements LegoCatalogBackend {
        _client = CatalogApiClient(
          dio: dio,
          httpConfig: httpConfig,
-       ) {}
+       );
+
+  /// Creates a backend from a concrete API client.
+  RebrickableBackend.fromClient(
+    CatalogApiClient client, {
+    required String apiKey,
+    String baseUrl = _defaultBaseUrl,
+  }) : _requestHeaders = _buildRequestHeaders(apiKey),
+       _baseUrl = _normalizeBaseUrl(baseUrl),
+       _ownsClient = false,
+       _client = client;
+
+  static const String _defaultBaseUrl = 'https://rebrickable.com';
 
   static Map<String, String> _buildRequestHeaders(String apiKey) {
     final normalizedApiKey = apiKey.trim();
@@ -38,16 +48,6 @@ class RebrickableBackend implements LegoCatalogBackend {
       'Accept': 'application/json',
     };
   }
-
-  /// Creates a backend from a concrete API client.
-  RebrickableBackend.fromClient(
-    CatalogApiClient client, {
-    required String apiKey,
-    String baseUrl = _defaultBaseUrl,
-  }) : _requestHeaders = _buildRequestHeaders(apiKey),
-       _baseUrl = _normalizeBaseUrl(baseUrl),
-       _ownsClient = false,
-       _client = client;
 
   final String _baseUrl;
   final bool _ownsClient;
@@ -79,7 +79,6 @@ class RebrickableBackend implements LegoCatalogBackend {
   /// over theme filtering and result sizing. Most callers should use
   /// [searchSets].
   ///
-
   Future<List<LegoSetSummary>> searchSetsAdvanced(
     String query, {
     int pageSize = 20,

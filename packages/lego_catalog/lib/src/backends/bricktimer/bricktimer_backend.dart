@@ -13,8 +13,6 @@ import 'package:lego_catalog/src/models/lego_set.dart';
 /// proxy can keep the Rebrickable API key hidden and optionally swap in other
 /// upstream catalog providers later.
 class BrickTimerBackend implements LegoCatalogBackend {
-  static const String _defaultBaseUrl = 'https://api.bricktimer.bramp.net';
-
   /// Creates a Brick Timer backend for the given [baseUrl].
   BrickTimerBackend({
     String baseUrl = _defaultBaseUrl,
@@ -36,6 +34,8 @@ class BrickTimerBackend implements LegoCatalogBackend {
   }) : _baseUrl = _normalizeBaseUrl(baseUrl),
        _ownsClient = false,
        _client = client;
+
+  static const String _defaultBaseUrl = 'https://api.bricktimer.bramp.net';
 
   final String _baseUrl;
   final bool _ownsClient;

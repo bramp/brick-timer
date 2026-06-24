@@ -107,7 +107,6 @@ void main() {
 
       final results = await backend.searchSetsAdvanced(
         'technic',
-        excludedThemeRootIds: const {},
       );
 
       expect(requestCount, 2);
@@ -213,7 +212,6 @@ void main() {
 
       final results = await backend.searchSetsAdvanced(
         'star wars',
-        excludedThemeRootIds: const {},
       );
 
       expect(results, hasLength(1));

@@ -57,28 +57,7 @@ class BrickTimerCatalogService {
       );
     }
 
-    final pageSize = _readIntQueryParameter(request, 'pageSize', fallback: 20);
-    final minParts = _readIntQueryParameter(request, 'minParts', fallback: 1);
-    final excludedThemeRootIds = _readIntListQueryParameter(
-      request,
-      'excludedThemeRootIds',
-      fallback: const {501},
-    );
-    final includeDescendantThemesInExclusion =
-        _readBoolQueryParameter(
-          request,
-          'includeDescendantThemesInExclusion',
-          fallback: true,
-        ) ??
-        true;
-
-    final results = await _backend.searchSets(
-      query,
-      pageSize: pageSize,
-      minParts: minParts,
-      excludedThemeRootIds: excludedThemeRootIds,
-      includeDescendantThemesInExclusion: includeDescendantThemesInExclusion,
-    );
+    final results = await _backend.searchSets(query);
 
     return _jsonResponse(
       200,
@@ -130,62 +109,6 @@ class BrickTimerCatalogService {
       'totalPieces': details.totalPieces,
       'imageUrl': details.imageUrl,
     };
-  }
-
-  static int _readIntQueryParameter(
-    Request request,
-    String key, {
-    required int fallback,
-  }) {
-    final rawValue = request.url.queryParameters[key];
-    if (rawValue == null || rawValue.trim().isEmpty) {
-      return fallback;
-    }
-
-    return int.tryParse(rawValue) ?? fallback;
-  }
-
-  static bool? _readBoolQueryParameter(
-    Request request,
-    String key, {
-    required bool fallback,
-  }) {
-    final rawValue = request.url.queryParameters[key];
-    if (rawValue == null || rawValue.trim().isEmpty) {
-      return fallback;
-    }
-
-    switch (rawValue.trim().toLowerCase()) {
-      case 'true':
-      case '1':
-      case 'yes':
-        return true;
-      case 'false':
-      case '0':
-      case 'no':
-        return false;
-      default:
-        return null;
-    }
-  }
-
-  static Set<int> _readIntListQueryParameter(
-    Request request,
-    String key, {
-    required Set<int> fallback,
-  }) {
-    final rawValue = request.url.queryParameters[key];
-    if (rawValue == null || rawValue.trim().isEmpty) {
-      return fallback;
-    }
-
-    final values = rawValue
-        .split(',')
-        .map((value) => int.tryParse(value.trim()))
-        .whereType<int>()
-        .toSet();
-
-    return values.isEmpty ? fallback : values;
   }
 
   static Response _jsonResponse(

@@ -44,6 +44,7 @@ deps:
 codegen:
 	@test -f apps/bricktimer/.env || echo "Warning: apps/bricktimer/.env is missing. Create it from apps/bricktimer/.env.example if you need REBRICKABLE_API_KEY locally."
 	$(APP) && dart run build_runner build
+	$(CATALOG) && dart run build_runner build
 
 ## Run the app (use DEVICE=macos, DEVICE=ios, etc.)
 run: codegen

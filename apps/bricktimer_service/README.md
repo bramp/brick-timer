@@ -6,15 +6,90 @@ Cloud Functions backend for Brick Timer.
 
 This service exposes a small, app-specific catalog API that fronts Rebrickable and keeps the Rebrickable API key server-side.
 
-Current routes:
+## API Reference
 
-- `GET /v1/health`
-- `GET /v1/sets/search?query=...`
-- `GET /v1/sets/{setNumber}`
+### Health Check
+
+```
+GET /health
+```
+
+Returns the service health status.
+
+**Response (200 OK):**
+```json
+{
+  "status": "ok"
+}
+```
+
+### Search Sets
+
+```
+GET /v1/sets/search?query=<query>
+```
+
+Search for LEGO sets by name or keywords.
+
+**Query Parameters:**
+- `query` (required): Search term (e.g., "Lamborghini", "Star Wars")
+
+**Search Behavior:**
+The search uses sensible defaults optimized for app clients:
+- Returns up to 20 results per request
+
+**Response (200 OK):**
+```json
+{
+  "results": [
+    {
+      "setNumber": "42115-1",
+      "name": "Lamborghini Sian FKP 37",
+      "totalPieces": 3696,
+      "imageUrl": "https://cdn.rebrickable.com/media/sets/42115-1.jpg"
+    }
+  ]
+}
+```
+
+**Error Responses:**
+- `400 Bad Request`: Missing or empty `query` parameter
+- `404 Not Found`: No results found (still returns 200 with empty results array)
+
+### Get Set Details
+
+```
+GET /v1/sets/<setNumber>
+```
+
+Get detailed information about a specific LEGO set.
+
+**Path Parameters:**
+- `setNumber` (required): LEGO set number (e.g., "42115-1")
+
+**Response (200 OK):**
+```json
+{
+  "setNumber": "42115-1",
+  "name": "Lamborghini Sian FKP 37",
+  "totalPieces": 3696,
+  "imageUrl": "https://cdn.rebrickable.com/media/sets/42115-1.jpg"
+}
+```
+
+**Error Responses:**
+- `400 Bad Request`: Missing set number in path
+- `404 Not Found`: Set not found in Rebrickable database
 
 ## App Check
 
 The HTTP function is configured to enforce Firebase App Check so only the Brick Timer app can call it.
+
+## Current routes:
+
+- `GET /health`
+- `GET /v1/sets/search?query=...`
+- `GET /v1/sets/{setNumber}`
 
 ## Local Development
 

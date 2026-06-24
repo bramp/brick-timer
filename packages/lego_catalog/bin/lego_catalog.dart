@@ -52,13 +52,12 @@ Future<void> main(List<String> arguments) async {
       help: 'Show usage for search command.',
     );
 
-  parser.commands['details']!
-    ..addFlag(
-      'help',
-      abbr: 'h',
-      negatable: false,
-      help: 'Show usage for details command.',
-    );
+  parser.commands['details']!.addFlag(
+    'help',
+    abbr: 'h',
+    negatable: false,
+    help: 'Show usage for details command.',
+  );
 
   late ArgResults parsed;
   try {
@@ -76,7 +75,8 @@ Future<void> main(List<String> arguments) async {
     return;
   }
 
-  final parsedLogLevel = (parsed['log-level'] as String?) ?? _defaultLogLevelName;
+  final parsedLogLevel =
+      (parsed['log-level'] as String?) ?? _defaultLogLevelName;
   final envLogLevel = (Platform.environment['LOG_LEVEL'] ?? '').trim();
   final resolvedLogLevel = parsed.wasParsed('log-level')
       ? parsedLogLevel
@@ -108,7 +108,8 @@ Future<void> main(List<String> arguments) async {
 
       final pageSize = int.parse(command['page-size'] as String);
       _log.info(
-        'Starting search: backend=$backendName, pageSize=$pageSize, query="$query"',
+        'Starting search: backend=$backendName, pageSize=$pageSize, '
+        'query="$query"',
       );
       final result = await backend.searchSets(
         query,
@@ -136,7 +137,9 @@ Future<void> main(List<String> arguments) async {
       );
 
       final result = await backend.getSetDetails(setNumber);
-      _log.info('Details lookup completed: ${result == null ? 'not found' : 'found'}');
+      _log.info(
+        'Details lookup completed: ${result == null ? 'not found' : 'found'}',
+      );
       if (result == null) {
         stdout.writeln('null');
       } else {
@@ -180,8 +183,8 @@ LegoCatalogBackend _buildBackend(ArgResults root) {
   switch (backendName) {
     case _rebrickableBackend:
       final apiKeyFromFlag = (root['api-key'] as String?)?.trim() ?? '';
-      final apiKeyFromEnv =
-          (Platform.environment['REBRICKABLE_API_KEY'] ?? '').trim();
+      final apiKeyFromEnv = (Platform.environment['REBRICKABLE_API_KEY'] ?? '')
+          .trim();
       final apiKey = apiKeyFromFlag.isNotEmpty ? apiKeyFromFlag : apiKeyFromEnv;
       if (apiKey.isEmpty) {
         throw const FormatException(
@@ -224,13 +227,8 @@ Dio _createCliDio() {
   final dio = Dio();
   dio.interceptors.add(
     LogInterceptor(
-      request: true,
-      requestHeader: true,
-      requestBody: false,
       responseHeader: false,
-      responseBody: false,
-      error: true,
-      logPrint: (Object obj) {
+      logPrint: (obj) {
         Logger('lego_catalog').finer(obj.toString());
       },
     ),
@@ -306,40 +304,38 @@ String _usage(ArgParser parser) {
   final searchUsage = parser.commands['search']?.usage ?? '';
   final detailsUsage = parser.commands['details']?.usage ?? '';
 
-  return [
-    'Usage: dart run lego_catalog [global options] <command> [command options] <arg>',
-    '',
-    'Commands:',
-    '  search <query>             Search sets by query.',
-    '  details <set-number>       Fetch details for one set number.',
-    '',
-    'Search options:',
-    searchUsage,
-    '',
-    'Details options:',
-    detailsUsage,
-    '',
-    'Tip: Use `dart run lego_catalog <command> -h` for command-specific help.',
-    '',
-    parser.usage,
-  ].join('\n');
+  return 'Usage: dart run lego_catalog [global options] <command> '
+      '[command options] <arg>\n'
+      '\n'
+      'Commands:\n'
+      '  search <query>             Search sets by query.\n'
+      '  details <set-number>       Fetch details for one set number.\n'
+      '\n'
+      'Search options:\n'
+      '$searchUsage\n'
+      '\n'
+      'Details options:\n'
+      '$detailsUsage\n'
+      '\n'
+      'Tip: Use `dart run lego_catalog <command> -h` for '
+      'command-specific help.\n'
+      '\n'
+      '${parser.usage}';
 }
 
 String _commandUsage(ArgParser parser, ArgResults command) {
   if (command.name == 'search') {
-    return [
-      'Usage: dart run lego_catalog [global options] search [options] <query>',
-      '',
-      parser.commands['search']?.usage ?? '',
-    ].join('\n');
+    return 'Usage: dart run lego_catalog [global options] search [options] '
+        '<query>\n'
+        '\n'
+        '${parser.commands['search']?.usage ?? ''}';
   }
 
   if (command.name == 'details') {
-    return [
-      'Usage: dart run lego_catalog [global options] details [options] <set-number>',
-      '',
-      parser.commands['details']?.usage ?? '',
-    ].join('\n');
+    return 'Usage: dart run lego_catalog [global options] details [options] '
+        '<set-number>\n'
+        '\n'
+        '${parser.commands['details']?.usage ?? ''}';
   }
 
   return 'Usage: dart run lego_catalog <command> [options] <arg>';

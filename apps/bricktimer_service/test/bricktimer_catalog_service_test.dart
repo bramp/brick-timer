@@ -9,23 +9,14 @@ class _FakeBackend implements LegoCatalogBackend {
   String? lastSearchQuery;
   String? lastSetNumber;
   int? lastPageSize;
-  int? lastMinParts;
-  Set<int>? lastExcludedThemeRootIds;
-  bool? lastIncludeDescendantThemesInExclusion;
 
   @override
   Future<List<LegoSetSummary>> searchSets(
     String query, {
     int pageSize = 20,
-    int minParts = 1,
-    Set<int> excludedThemeRootIds = const {501},
-    bool includeDescendantThemesInExclusion = true,
   }) async {
     lastSearchQuery = query;
     lastPageSize = pageSize;
-    lastMinParts = minParts;
-    lastExcludedThemeRootIds = excludedThemeRootIds;
-    lastIncludeDescendantThemesInExclusion = includeDescendantThemesInExclusion;
     return searchResults;
   }
 
@@ -48,7 +39,7 @@ void main() {
       expect(await response.readAsString(), contains('"status":"ok"'));
     });
 
-    test('searches sets and returns app-specific JSON', () async {
+    test('searches sets with query parameter', () async {
       final backend = _FakeBackend()
         ..searchResults = [
           const LegoSetSummary(
@@ -62,18 +53,12 @@ void main() {
       final response = await service.handle(
         Request(
           'GET',
-          Uri.parse(
-            'https://example.com/v1/sets/search?query=Lamborghini&pageSize=12&minParts=5&excludedThemeRootIds=501,497&includeDescendantThemesInExclusion=false',
-          ),
+          Uri.parse('https://example.com/v1/sets/search?query=Lamborghini'),
         ),
       );
 
       expect(response.statusCode, 200);
       expect(backend.lastSearchQuery, 'Lamborghini');
-      expect(backend.lastPageSize, 12);
-      expect(backend.lastMinParts, 5);
-      expect(backend.lastExcludedThemeRootIds, {501, 497});
-      expect(backend.lastIncludeDescendantThemesInExclusion, false);
       expect(
         await response.readAsString(),
         contains('"setNumber":"42115-1"'),
