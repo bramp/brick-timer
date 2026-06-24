@@ -51,9 +51,16 @@ run: codegen
 	$(APP) && flutter run -d $(DEVICE)
 
 format:
-	@find apps packages \
-		\( -name build -o -name .dart_tool \) -prune -o \
-		-name '*.dart' -print0 | xargs -0 dart format
+	@if [ -n "$(strip $(FILES))" ]; then \
+		dart_files=$$(echo "$(FILES)" | tr ' ' '\n' | grep -E '\\.dart$$' || true); \
+		if [ -n "$$dart_files" ]; then \
+			echo "$$dart_files" | xargs dart format; \
+		fi; \
+	else \
+		find apps packages \
+			\( -name build -o -name .dart_tool \) -prune -o \
+			-name '*.dart' -print0 | xargs -0 dart format; \
+	fi
 
 analyze: codegen
 	dart analyze --fatal-infos apps/bricktimer_service packages/lego_catalog

@@ -3,10 +3,9 @@ repos:
     hooks:
       - id: make-format
         name: make format
-        entry: make format
+        entry: bash -c 'make format FILES="$*"' --
         language: system
-        pass_filenames: false
-        always_run: true
+        files: '\.dart$'
       - id: make-lint
         name: make lint
         entry: make lint
