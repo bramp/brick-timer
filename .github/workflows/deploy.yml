@@ -141,10 +141,33 @@ jobs:
     environment:
       name: production
     permissions:
+      id-token: write
       contents: read
 
     steps:
       - uses: actions/checkout@v6
+
+      - name: Validate WIF deploy variables
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          GCP_WIF_PROVIDER: ${{ vars.GCP_WIF_PROVIDER }}
+          GCP_DEPLOY_SA: ${{ vars.GCP_DEPLOY_SA }}
+        run: |
+          if [ -z "$GCP_PROJECT_ID" ] || [ -z "$GCP_WIF_PROVIDER" ] || [ -z "$GCP_DEPLOY_SA" ]; then
+            echo "Missing one or more required variables: GCP_PROJECT_ID, GCP_WIF_PROVIDER, GCP_DEPLOY_SA"
+            exit 1
+          fi
+
+      - name: Authenticate to Google Cloud (WIF)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+
+      - name: Set up gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -155,16 +178,6 @@ jobs:
 
       - name: Install dependencies
         run: make deps
-
-      - name: Validate Firebase deploy secrets
-        env:
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID_PROD }}
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_PROD }}
-        run: |
-          if [ -z "$FIREBASE_PROJECT_ID" ] || [ -z "$FIREBASE_TOKEN" ]; then
-            echo "Missing FIREBASE_PROJECT_ID_PROD or FIREBASE_TOKEN_PROD GitHub repository secret."
-            exit 1
-          fi
 
       - name: Ensure generated functions manifest is up to date
         working-directory: apps/bricktimer_service
@@ -184,6 +197,5 @@ jobs:
       - name: Deploy Cloud Functions
         working-directory: apps/bricktimer_service
         env:
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID_PROD }}
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_PROD }}
-        run: firebase deploy --only functions:bricktimer-service --project "$FIREBASE_PROJECT_ID" --token "$FIREBASE_TOKEN" --non-interactive
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: firebase deploy --only functions:bricktimer-service --project "$GCP_PROJECT_ID" --non-interactive
